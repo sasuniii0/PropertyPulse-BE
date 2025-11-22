@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuthModal } from "../context/AuthModalContext";
 
 // SVG Icons
 const PulseIcon = () => (
@@ -53,6 +54,8 @@ export default function Signin() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const { openSignUp, closeModal } = useAuthModal();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -77,6 +80,7 @@ export default function Signin() {
         {/* Close Button */}
         <button 
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors text-2xl"
+          onClick={closeModal}
         >
           ×
         </button>
@@ -171,6 +175,7 @@ export default function Signin() {
           Don't have an account?{' '}
           <button 
             className="text-teal-600 font-semibold hover:underline"
+            onClick={openSignUp}
           >
             Sign Up
           </button>

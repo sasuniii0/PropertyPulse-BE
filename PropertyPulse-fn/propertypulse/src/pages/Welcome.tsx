@@ -2,6 +2,8 @@ import { useState  } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Signin from './Signin';
 import Signup from './Signup';
+import { useAuthModal } from "../context/AuthModalContext";
+
 
 // SVG Icons
 const PulseIcon = () => (
@@ -62,15 +64,7 @@ export default function Welcome() {
     setShowSignIn(true);
   };
 
-  const handleOpenSignUp = () => {
-    setShowSignIn(false);
-    setShowSignUp(true);
-  };
-
-  const handleCloseModals = () => {
-    setShowSignIn(false);
-    setShowSignUp(false);
-  };
+  const { modal, openSignIn, openSignUp, closeModal } = useAuthModal();
 
   const properties = [
     {
@@ -105,10 +99,10 @@ export default function Welcome() {
   return (
     <div className="min-h-screen bg-white font-sans">
       {/* Auth Modals */}
-      {showSignIn && (
+      {modal === "signin" && (
         <Signin/>
       )}
-      {showSignUp && (
+      {modal === "signup" && (
         <Signup/>
       )}
 
@@ -126,7 +120,7 @@ export default function Welcome() {
           <a href="#" className="hover:text-white">About us</a>
         </div>
         <button 
-          onClick={handleOpenSignIn}
+          onClick={openSignIn}
           className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-2 rounded-full transition-all"
         >
           Try now

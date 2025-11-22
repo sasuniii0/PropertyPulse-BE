@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuthModal } from "../context/AuthModalContext";
 
 // SVG Icons
 const PulseIcon = () => (
@@ -68,6 +69,10 @@ export default function SignUp() {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [role, setRole] = useState<"client" | "agent">("client");
+
+
+  const { openSignIn, closeModal } = useAuthModal();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,6 +110,7 @@ export default function SignUp() {
         {/* Close Button */}
         <button 
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors text-2xl"
+          onClick={closeModal}
         >
           ×
         </button>
@@ -122,6 +128,41 @@ export default function SignUp() {
         <p className="text-gray-500 text-center mb-6">
           Sign up to find your dream property in Sri Lanka
         </p>
+
+        {/* Role Selector */}
+        <div className="flex flex-col gap-3 mb-6">
+        <div className="flex items-center justify-center gap-4">
+
+            {/* Client Option */}
+            <button
+                type="button"
+                onClick={() => setRole("client")}
+                className={`w-40 py-3 rounded-xl border flex flex-col items-center gap-1 transition-all ${
+                    role === "client"
+                    ? "bg-teal-500 text-white border-teal-500"
+                    : "bg-white text-gray-600 border-gray-300 hover:bg-gray-100"
+                }`}
+                >
+                <span className="font-medium">I am a Client</span>
+            </button>
+
+            {/* Agent Option */}
+            <button
+                type="button"
+                onClick={() => setRole("agent")}
+                className={`w-40 py-3 rounded-xl border flex flex-col items-center gap-1 transition-all ${
+                    role === "agent"
+                    ? "bg-teal-500 text-white border-teal-500"
+                    : "bg-white text-gray-600 border-gray-300 hover:bg-gray-100"
+                }`}
+                >
+                <span className="font-medium">I am an Agent</span>
+            </button>
+
+        </div>
+        </div>
+
+
 
         {/* Social Login */}
         <div className="flex gap-4 mb-6">
@@ -252,6 +293,7 @@ export default function SignUp() {
             className="w-full bg-teal-500 hover:bg-teal-600 disabled:bg-teal-300 text-white py-3 rounded-xl font-semibold transition-all"
           >
             {isLoading ? 'Creating Account...' : 'Create Account'}
+            
           </button>
         </form>
 
@@ -260,6 +302,7 @@ export default function SignUp() {
           Already have an account?{' '}
           <button 
             className="text-teal-600 font-semibold hover:underline"
+            onClick={openSignIn}
           >
             Sign In
           </button>
