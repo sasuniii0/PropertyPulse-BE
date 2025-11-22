@@ -46,12 +46,8 @@ const LockIcon = () => (
   </svg>
 );
 
-interface SignInProps {
-  onClose: () => void;
-  onSwitchToSignUp: () => void;
-}
 
-export default function Signin({ onClose, onSwitchToSignUp }: SignInProps) {
+export default function Signin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -74,14 +70,12 @@ export default function Signin({ onClose, onSwitchToSignUp }: SignInProps) {
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
       />
       
       {/* Modal */}
       <div className="relative bg-white rounded-3xl shadow-2xl w-[90%] max-w-md p-8 z-10">
         {/* Close Button */}
         <button 
-          onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors text-2xl"
         >
           ×
@@ -176,7 +170,6 @@ export default function Signin({ onClose, onSwitchToSignUp }: SignInProps) {
         <p className="text-center text-gray-500 mt-6">
           Don't have an account?{' '}
           <button 
-            onClick={onSwitchToSignUp}
             className="text-teal-600 font-semibold hover:underline"
           >
             Sign Up

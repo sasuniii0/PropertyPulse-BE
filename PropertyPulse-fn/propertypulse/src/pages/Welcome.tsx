@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState  } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Signin from './Signin';
 import Signup from './Signup';
 
@@ -49,6 +50,8 @@ export default function Welcome() {
   const [city, setCity] = useState('Colombo 7');
   const [propertyType, setPropertyType] = useState('Villa');
   const [price, setPrice] = useState('75,000,000');
+
+  const navigate = useNavigate()
   
   // Auth modal states
   const [showSignIn, setShowSignIn] = useState(false);
@@ -103,16 +106,10 @@ export default function Welcome() {
     <div className="min-h-screen bg-white font-sans">
       {/* Auth Modals */}
       {showSignIn && (
-        <Signin 
-          onClose={handleCloseModals} 
-          onSwitchToSignUp={handleOpenSignUp} 
-        />
+        <Signin/>
       )}
       {showSignUp && (
-        <Signup 
-          onClose={handleCloseModals} 
-          onSwitchToSignIn={handleOpenSignIn} 
-        />
+        <Signup/>
       )}
 
       {/* Navigation */}

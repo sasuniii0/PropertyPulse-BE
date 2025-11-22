@@ -58,12 +58,7 @@ const PhoneIcon = () => (
   </svg>
 );
 
-interface SignUpProps {
-  onClose: () => void;
-  onSwitchToSignIn: () => void;
-}
-
-export default function SignUp({ onClose, onSwitchToSignIn }: SignUpProps) {
+export default function SignUp() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -103,14 +98,12 @@ export default function SignUp({ onClose, onSwitchToSignIn }: SignUpProps) {
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
       />
       
       {/* Modal */}
       <div className="relative bg-white rounded-3xl shadow-2xl w-[90%] max-w-md p-8 z-10 max-h-[90vh] overflow-y-auto">
         {/* Close Button */}
         <button 
-          onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors text-2xl"
         >
           ×
@@ -266,7 +259,6 @@ export default function SignUp({ onClose, onSwitchToSignIn }: SignUpProps) {
         <p className="text-center text-gray-500 mt-6">
           Already have an account?{' '}
           <button 
-            onClick={onSwitchToSignIn}
             className="text-teal-600 font-semibold hover:underline"
           >
             Sign In

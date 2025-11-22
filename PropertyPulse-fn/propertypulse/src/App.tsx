@@ -1,15 +1,12 @@
 import './App.css'
-import Welcome from './pages/Welcome'
+import { AuthProvider } from './context/AuthContext'
+import Router from './routes'
 
 function App() {
-
   return (
-    <>
-      
-      <Welcome/>
-      
-    </>
+    <AuthProvider>
+      <Router/>
+    </AuthProvider>
   )
 }
-
 export default App
