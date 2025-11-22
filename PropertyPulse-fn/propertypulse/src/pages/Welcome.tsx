@@ -77,22 +77,24 @@ export default function Welcome() {
       img: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=400&h=300&fit=crop'
     },
     {
-      id: 2,
-      name: 'Negombo Beach House',
-      price: '65,000,000',
-      address: 'Negombo, Western Province',
-      beds: 3,
-      baths: 2,
-      img: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&h=300&fit=crop'
+      id: 5,
+      name: 'Nuwara Eliya Hill Plot',
+      price: '18,500,000',
+      address: 'Nuwara Eliya, Central Province',
+      perches: 20,
+      type: 'land',
+      img: 'https://images.unsplash.com/photo-1628624747186-a941c476b7ef?w=400&h=300&fit=crop'
     },
     {
-      id: 3,
-      name: 'Kandy Hillside Retreat',
-      price: '45,000,000',
-      address: 'Kandy, Central Province',
-      beds: 3,
-      baths: 2,
-      img: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=400&h=300&fit=crop'
+      id: 8,
+      name: 'Marine Drive Luxury Suite',
+      price: '95,000,000',
+      address: 'Colombo 4, Western Province',
+      beds: 4,
+      baths: 3,
+      floor: 18,
+      type: 'apartment',
+      img: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400&h=300&fit=crop'
     },
   ];
 
@@ -226,6 +228,98 @@ export default function Welcome() {
         </div>
       </div>
 
+      {/* Projects & Stats Section */}
+      <div className="py-20 px-8 bg-stone-100">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            {/* Left Side - Text & Stats */}
+            <div>
+              <p className="text-gray-600 mb-6 leading-relaxed">
+                PropertyPulse offers the most excellent land alternatives in Sri Lanka, as well as a variety of support services, such as legal and financial assistance, to help you realize your property dreams. In Sri Lanka's highly competitive real estate market, PropertyPulse acquired over 300,000 customers, sufficient proof of our capacity and leadership in the real estate industry.
+              </p>
+              
+              <button className="flex items-center gap-2 mb-12 group">
+                <span className="w-10 h-10 bg-teal-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-lg">→</span>
+                </span>
+                <span className="text-teal-500 font-medium group-hover:underline">Explore more</span>
+              </button>
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 gap-8">
+                <div className="border-l-2 border-teal-500 pl-4">
+                  <div className="text-5xl font-bold text-gray-900">29+</div>
+                  <div className="text-gray-600 mt-1">Years of Trust</div>
+                </div>
+                <div className="border-l-2 border-teal-500 pl-4">
+                  <div className="text-5xl font-bold text-gray-900">18</div>
+                  <div className="text-gray-600 mt-1">Districts Covered</div>
+                </div>
+                <div className="border-l-2 border-teal-500 pl-4">
+                  <div className="text-5xl font-bold text-gray-900">300K+</div>
+                  <div className="text-gray-600 mt-1">Satisfied Customers</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Side - Project Cards */}
+            <div className="space-y-4">
+              {/* Lands Card */}
+              <div className="relative h-40 rounded-2xl overflow-hidden">
+                <img 
+                  src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&h=400&fit=crop" 
+                  alt="Lands" 
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/40" />
+                <div className="absolute bottom-6 left-6 text-white">
+                  <h3 className="text-2xl font-bold">LANDS</h3>
+                  <p className="text-teal-500 text-3xl font-bold">10000+</p>
+                  <p className="text-sm tracking-wider">LAND PROJECTS</p>
+                </div>
+              </div>
+
+              {/* Houses & Apartments Row */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Houses Card */}
+                <div className="relative h-56 rounded-2xl overflow-hidden">
+                  <img 
+                    src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&h=500&fit=crop" 
+                    alt="Houses" 
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/40" />
+                  <div className="absolute bottom-6 left-6 text-white">
+                    <h3 className="text-xl font-bold">HOUSES</h3>
+                    <p className="text-teal-500 text-2xl font-bold">5</p>
+                    <p className="text-xs tracking-wider">ON GOING PROJECTS</p>
+                    <p className="text-teal-500 text-2xl font-bold mt-2">28</p>
+                    <p className="text-xs tracking-wider">COMPLETED PROJECTS</p>
+                  </div>
+                </div>
+
+                {/* Apartments Card */}
+                <div className="relative h-56 rounded-2xl overflow-hidden">
+                  <img 
+                    src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400&h=500&fit=crop" 
+                    alt="Apartments" 
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/40" />
+                  <div className="absolute bottom-6 left-6 text-white">
+                    <h3 className="text-xl font-bold">APARTMENTS</h3>
+                    <p className="text-teal-500 text-2xl font-bold">11</p>
+                    <p className="text-xs tracking-wider">ON GOING PROJECTS</p>
+                    <p className="text-teal-500 text-2xl font-bold mt-2">42</p>
+                    <p className="text-xs tracking-wider">COMPLETED PROJECTS</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Easiest Method Section */}
       <div className="bg-gray-50 py-20 px-8">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
@@ -251,28 +345,6 @@ export default function Welcome() {
             <button className="bg-teal-500 hover:bg-teal-600 text-white px-8 py-3 rounded-full transition-all">
               Learn More
             </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Stats Section */}
-      <div className="py-16 px-8 bg-white">
-        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-          <div>
-            <div className="text-4xl font-bold text-teal-600 mb-2">500+</div>
-            <div className="text-gray-500">Properties in Colombo</div>
-          </div>
-          <div>
-            <div className="text-4xl font-bold text-teal-600 mb-2">200+</div>
-            <div className="text-gray-500">Properties in Kandy</div>
-          </div>
-          <div>
-            <div className="text-4xl font-bold text-teal-600 mb-2">150+</div>
-            <div className="text-gray-500">Properties in Galle</div>
-          </div>
-          <div>
-            <div className="text-4xl font-bold text-teal-600 mb-2">1000+</div>
-            <div className="text-gray-500">Happy Customers</div>
           </div>
         </div>
       </div>
