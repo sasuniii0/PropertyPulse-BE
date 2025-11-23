@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { useAuthModal } from "../context/AuthModalContext";
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { getMyDetails, signin } from '../services/Auth';
 
 // SVG Icons
 const PulseIcon = () => (
@@ -55,17 +58,50 @@ export default function Signin() {
   const [isLoading, setIsLoading] = useState(false);
 
   const { openSignUp, closeModal } = useAuthModal();
+  const navigate = useNavigate()
+  const {setUser} = useAuth()
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     // Simulate API call
     setTimeout(() => {
       console.log('Sign In:', { email, password });
       setIsLoading(false);
       // Handle successful login here
     }, 1500);
+
+    if(!email || !password) {
+      alert("Please fill in all fields")
+      return;
+    }
+
+    try{
+      const res = await signin(email,password)
+      console.log(res.data.accessToken)
+
+      if(!res.data.accessToken) {
+        alert("Login failed. please try again")
+        return
+      }
+
+      await localStorage.setItem("accessToken" , res.data.accessToken)
+      await localStorage.setItem("refreshToken" , res.data.refreshToken)
+
+      const details = await getMyDetails()
+      setUser(details.data)
+      console.log(details.data)
+
+      alert("Login successfull!")
+      navigate("/home")
+    }catch(error) {
+      console.error("Login failed: " ,error)
+      alert("Login failed. please try again.")
+      return
+    }
+
   };
 
   return (

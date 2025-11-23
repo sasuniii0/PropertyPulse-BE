@@ -10,12 +10,14 @@ type RegisterData = {
     role : string;
 }
 
-export const register = async(data:RegisterData) =>{
-
+export const signup = async(data:RegisterData) =>{
+    const res = await api.post('/auth/signup',data)
+    return res.data
 }
 
-export const login = async (email: string , password:string) => {
-    
+export const signin = async (email: string , password:string) => {
+    const res = await api.post('/auth/signin' , {email,password})
+    return res.data
 }
 
 export const handleRefreshToken = async(refreshToken : string)=>{

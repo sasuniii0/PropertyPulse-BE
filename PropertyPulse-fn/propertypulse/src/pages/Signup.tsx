@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuthModal } from "../context/AuthModalContext";
+import { useNavigate } from 'react-router-dom';
 
 // SVG Icons
 const PulseIcon = () => (
@@ -78,6 +79,19 @@ export default function SignUp() {
     e.preventDefault();
     setError('');
 
+    // Simulate API call
+    setTimeout(() => {
+      console.log('Sign Up:', { fullName, email, phone, password });
+      setIsLoading(false);
+    }, 1500);
+
+    const navigate = useNavigate()
+
+    if(!fullName || !email || !password || !confirmPassword || !role) {
+      alert("Please fill all the details")
+      return
+    }
+
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
@@ -89,13 +103,28 @@ export default function SignUp() {
     }
 
     setIsLoading(true);
+
+    try{
+      const obj = {
+        fullName: fullName,
+        email : email,
+        password: password,
+        role:role.toLocaleUpperCase()
+      }
+
+      const response : any = await (obj)
+      console.log(response.data)
+
+      alert("Registration successfull!")
+      navigate('/signin')
+      return;
+
+    }catch(err){
+      console.error("Registration failed:", error);
+      alert("Registration failed. Please try again.");
+      return;
+    }
     
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Sign Up:', { fullName, email, phone, password });
-      setIsLoading(false);
-      // Handle successful signup here
-    }, 1500);
   };
 
   return (
