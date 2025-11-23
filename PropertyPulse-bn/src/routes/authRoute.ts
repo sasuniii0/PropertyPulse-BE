@@ -3,8 +3,8 @@ import {
   handleRefreshToken,
   userLogin,
   userRegister,
-} from "../controllers/AuthController";
-import { authenticate } from "../middlewares/AuthMiddleware";
+} from "../controllers/authController";
+import { authenticate } from "../middlewares/authMiddleware";
 
 const route = Router();
 

@@ -2,8 +2,7 @@ import axios from "axios";
 import api from "../services/Api"
 
 type RegisterData = {
-    firstname : string;
-    lastname : string;
+    name : string;
     email : string;
     password : string;
     contactNumber : string;

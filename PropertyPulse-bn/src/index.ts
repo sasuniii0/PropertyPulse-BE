@@ -1,5 +1,5 @@
 import express, {Application , Request , Response} from "express"
-import authRoute from "./routes/AuthRoute"
+import authRoute from "./routes/authRoute"
 import cors from "cors"
 import dotenv from "dotenv"
 import mongoose from "mongoose"

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { IUser, Role, User } from "../models/UserModel";
-import { signAccessToken, signRefreshToken } from "../utils/Tokens";
-import { AuthRequest } from "../middlewares/AuthMiddleware";
+import { IUser, Role, User } from "../models/userModel";
+import { signAccessToken, signRefreshToken } from "../utils/tokens";
+import { AuthRequest } from "../middlewares/authMiddleware";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";

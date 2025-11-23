@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuthModal } from "../context/AuthModalContext";
 import { useNavigate } from 'react-router-dom';
+import { signup } from '../services/Auth';
 
 // SVG Icons
 const PulseIcon = () => (
@@ -61,9 +62,9 @@ const PhoneIcon = () => (
 );
 
 export default function SignUp() {
-  const [fullName, setFullName] = useState('');
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+  const [contactNumber, setcontactNumber] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -74,6 +75,8 @@ export default function SignUp() {
 
 
   const { openSignIn, closeModal } = useAuthModal();
+  const navigate = useNavigate()
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,13 +84,12 @@ export default function SignUp() {
 
     // Simulate API call
     setTimeout(() => {
-      console.log('Sign Up:', { fullName, email, phone, password });
+      console.log('Sign Up:', { name, email, contactNumber, password });
       setIsLoading(false);
     }, 1500);
 
-    const navigate = useNavigate()
 
-    if(!fullName || !email || !password || !confirmPassword || !role) {
+    if(!name || !email || !contactNumber || !password || !confirmPassword || !role) {
       alert("Please fill all the details")
       return
     }
@@ -106,13 +108,14 @@ export default function SignUp() {
 
     try{
       const obj = {
-        fullName: fullName,
+        name: name,
         email : email,
+        contactNumber: contactNumber,
         password: password,
         role:role.toLocaleUpperCase()
       }
 
-      const response : any = await (obj)
+      const response : any = await signup(obj)
       console.log(response.data)
 
       alert("Registration successfull!")
@@ -225,8 +228,8 @@ export default function SignUp() {
             <input
               type="text"
               placeholder="Full Name"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               required
               className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-teal-500 transition-colors"
             />
@@ -253,8 +256,8 @@ export default function SignUp() {
             <input
               type="tel"
               placeholder="Phone Number (+94 77 123 4567)"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              value={contactNumber}
+              onChange={(e) => setcontactNumber(e.target.value)}
               required
               className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-teal-500 transition-colors"
             />
