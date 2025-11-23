@@ -1,0 +1,32 @@
+import express, {Application , Request , Response} from "express"
+import authRoute from "./routes/AuthRoute"
+import cors from "cors"
+import dotenv from "dotenv"
+import mongoose from "mongoose"
+
+dotenv.config()
+const app:Application = express();
+
+const SERVER_PORT = process.env.SERVER_PORT as string
+const MONGO_URI = process.env.MONGO_URI as string
+
+app.use(express.json());
+
+app.use(cors({
+    origin:["http://localhost:5173", "http://localhost:3000"],
+    methods:["GET","POST","PUT","DELETE"],
+    credentials:true,
+}))
+
+app.use("/api/v1/auth" , authRoute)
+
+mongoose.connect(MONGO_URI).then(() =>{
+    console.log("Connected to MongoDB")
+}).catch((err) =>{
+    console.log("Error connecting to MongoDB" , err)
+    process.exit(1)
+})
+
+app.listen(SERVER_PORT, () =>{
+    console.log("Server is running on port 5000")
+})
