@@ -44,7 +44,7 @@ export default function Router() {
                 <Routes>
                     <Route path="/" element={<Welcome />} />
                     <Route path="/signin" element = {<Signin/>} />
-                    <Route path="/signin" element = {<Signup/>}/>
+                    <Route path="/signup" element = {<Signup/>}/>
 
                     <Route element={
                             <RequiredAuth>

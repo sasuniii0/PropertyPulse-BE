@@ -107,3 +107,27 @@ export const handleRefreshToken = async (req: Request, res: Response) => {
     res.status(403).json({ message: "Invalid or expired token" });
   }
 };
+
+export const getUserDetail = async (req:AuthRequest, res:Response) =>{
+  if(!req.user) {
+    return res.status(401).json({message : "Unauthorized"})
+  }
+
+  const userId = req.user.sub
+  const user = ((await User.findById(userId).select("-password")) as IUser) || null
+
+  if(!user) {
+    return res.status(404).json({
+      message : "User not found"
+    })
+  }
+
+  const {name , email , role  } = user
+
+  res.status(200).json({
+    message : "OK",
+    data: {
+      name , email , role
+    }
+  })
+}

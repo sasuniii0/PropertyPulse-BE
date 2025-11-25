@@ -1,5 +1,6 @@
 import { Request, Response, Router } from "express";
 import {
+  getUserDetail,
   handleRefreshToken,
   userLogin,
   userRegister,
@@ -11,5 +12,6 @@ const route = Router();
 route.post("/signup", userRegister);
 route.post("/signin", userLogin);
 route.post("/refresh", handleRefreshToken);
+route.get("/me" ,authenticate ,getUserDetail)
 
 export default route;

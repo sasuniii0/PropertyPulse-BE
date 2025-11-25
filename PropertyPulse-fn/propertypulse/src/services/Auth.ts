@@ -1,4 +1,3 @@
-import axios from "axios";
 import api from "../services/Api"
 
 type RegisterData = {
@@ -25,5 +24,6 @@ export const handleRefreshToken = async(refreshToken : string)=>{
 }
 
 export const getMyDetails = async() =>{
-    return await axios.get("/auth/me")
+    const res = await api.get('/auth/me')
+    return res.data;
 }

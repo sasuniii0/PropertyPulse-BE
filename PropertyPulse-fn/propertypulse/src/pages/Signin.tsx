@@ -92,7 +92,6 @@ export default function Signin() {
 
       const details = await getMyDetails()
       setUser(details.data)
-      console.log(details.data)
 
       alert("Login successfull!")
       navigate("/home")

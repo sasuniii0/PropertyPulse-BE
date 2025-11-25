@@ -1,9 +1,15 @@
 import {  createContext, useContext,useEffect,useState } from "react";
 import { getMyDetails } from "../services/Auth";
 
-const AuthContext = createContext<any>(null)
+interface AuthContextType{
+    user:any;
+    setUser: (user:any) => void;
+    loading: boolean
+}
 
-export const AuthProvider = ({children} : any) =>{
+const AuthContext = createContext<AuthContextType | null >(null)
+
+export const AuthProvider = ({children} : {children : React.ReactNode}) =>{
     const [user,setUser ] =useState<any>(null)
     const [loading , setLoading] = useState(true)
 
@@ -14,7 +20,9 @@ export const AuthProvider = ({children} : any) =>{
                 setUser(res.data)
             }).catch((err) =>{
                 setUser(null)
+                setLoading(false)
                 console.error(err)
+                return
             }).finally(() =>{
                 setLoading(false)
             })
