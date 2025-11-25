@@ -1,5 +1,9 @@
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useState } from "react";
+import ActionCard from "../components/ActionCard";
+import StatCard from "../components/StatCard";
+import InquiryCard from "../components/InquiryCard";
+import ActivityCard from "../components/ActivityCard";
 
 // SVG Icons
 const PulseIcon = () => (
@@ -56,7 +60,6 @@ const UserIcon = () => (
 );
 
 
-
 const BedIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M2 4v16" />
@@ -84,13 +87,7 @@ const MapPinIcon = () => (
 );
 
 export default function Home() {
-  const { user, loading, setUser } = useAuth();
-
-  const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem("accessToken");
-    window.location.reload();
-  };
+  const { user, loading } = useAuth();
 
   // Mock properties data
   const properties = [
@@ -139,6 +136,8 @@ export default function Home() {
     );
   }
 
+  const navigate = useNavigate()
+
   // CLIENT DASHBOARD
   if (user.role === "CLIENT") {
     return (
@@ -153,10 +152,10 @@ export default function Home() {
 
           {/* Quick Actions */}
           <div className="grid md:grid-cols-4 gap-4">
-            <ActionCard icon={<SearchIcon />} title="Search Properties" desc="Browse all listings" color="bg-teal-100" />
-            <ActionCard icon={<HeartIcon />} title="Saved Properties" desc="View your favorites" color="bg-red-100" />
-            <ActionCard icon={<UserIcon />} title="My Profile" desc="Update your details" color="bg-blue-100" />
-            <ActionCard icon={<HomeIconSmall />} title="My Inquiries" desc="Track your requests" color="bg-purple-100" />
+            <ActionCard icon={<SearchIcon />} title="Search Properties" desc="Browse all listings" color="bg-teal-100" onClick={() => navigate("/search")} />
+            <ActionCard icon={<HeartIcon />} title="Saved Properties" desc="View your favorites" color="bg-red-100" onClick={() => navigate("/favourites")}/>
+            <ActionCard icon={<UserIcon />} title="My Profile" desc="Update your details" color="bg-blue-100" onClick={() => navigate("/editme")}/>
+            <ActionCard icon={<HomeIconSmall />} title="My Inquiries" desc="Track your requests" color="bg-purple-100" onClick={() => navigate("/inquaries")}/>
           </div>
 
           {/* Available Properties */}
@@ -251,9 +250,9 @@ export default function Home() {
 
         {/* Quick Actions */}
         <div className="grid md:grid-cols-3 gap-4">
-          <ActionCard icon={<PlusIcon />} title="Create New Listing" desc="Add a new property" color="bg-green-100" />
-          <ActionCard icon={<EditIcon />} title="Manage Listings" desc="Edit or remove properties" color="bg-blue-100" />
-          <ActionCard icon={<ChartIcon />} title="View Analytics" desc="Track performance" color="bg-orange-100" />
+          <ActionCard icon={<PlusIcon />} title="Create New Listing" desc="Add a new property" color="bg-green-100" onClick={() => navigate("/createListnings")}/>
+          <ActionCard icon={<EditIcon />} title="Manage Listings" desc="Edit or remove properties" color="bg-blue-100" onClick={() => navigate("/manageListnings")}/>
+          <ActionCard icon={<ChartIcon />} title="View Analytics" desc="Track performance" color="bg-orange-100" onClick={() => navigate("/viewAll")}/>
         </div>
 
         {/* My Active Listings */}
@@ -313,38 +312,9 @@ export default function Home() {
 }
 
 // REUSABLE COMPONENTS
-const ActionCard = ({ icon, title, desc, color }: any) => (
-  <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-all cursor-pointer group">
-    <div className={`w-12 h-12 ${color} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-      {icon}
-    </div>
-    <h3 className="font-semibold text-gray-900 mb-1">{title}</h3>
-    <p className="text-sm text-gray-500">{desc}</p>
-  </div>
-);
 
-const StatCard = ({ label, value }: any) => (
-  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-    <p className="text-sm text-gray-500">{label}</p>
-    <h3 className="text-2xl font-bold text-gray-900 mt-1">{value}</h3>
-  </div>
-);
 
-const InquiryCard = ({ name, date }: any) => (
-  <div className="p-4 border border-gray-200 rounded-lg flex items-center justify-between hover:bg-gray-50 transition-all">
-    <div>
-      <h4 className="font-semibold text-gray-900">{name}</h4>
-      <p className="text-sm text-gray-500">Inquired {date}</p>
-    </div>
-    <button className="text-sm font-medium text-teal-600 hover:underline">View</button>
-  </div>
-);
 
-const ActivityCard = ({ activity, time }: any) => (
-  <div className="p-4 border border-gray-200 rounded-lg flex items-center justify-between hover:bg-gray-50 transition-all">
-    <div>
-      <h4 className="font-semibold text-gray-900 text-sm">{activity}</h4>
-      <p className="text-xs text-gray-500 mt-1">{time}</p>
-    </div>
-  </div>
-);
+
+
+

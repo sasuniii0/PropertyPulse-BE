@@ -1,5 +1,4 @@
 import { useState  } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Signin from './Signin';
 import Signup from './Signup';
 import { useAuthModal } from "../context/AuthModalContext";
@@ -51,20 +50,9 @@ const HomeIcon = () => (
 export default function Welcome() {
   const [city, setCity] = useState('Colombo 7');
   const [propertyType, setPropertyType] = useState('Villa');
-  const [price, setPrice] = useState('75,000,000');
+  const [price] = useState('75,000,000');  
 
-  const navigate = useNavigate()
-  
-  // Auth modal states
-  const [showSignIn, setShowSignIn] = useState(false);
-  const [showSignUp, setShowSignUp] = useState(false);
-
-  const handleOpenSignIn = () => {
-    setShowSignUp(false);
-    setShowSignIn(true);
-  };
-
-  const { modal, openSignIn, openSignUp, closeModal } = useAuthModal();
+  const { modal, openSignIn } = useAuthModal();
 
   const properties = [
     {

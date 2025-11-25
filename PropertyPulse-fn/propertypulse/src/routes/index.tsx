@@ -2,6 +2,13 @@ import { BrowserRouter , Routes , Route , Navigate} from "react-router-dom";
 import { Suspense ,lazy, type ReactNode} from "react";
 import { useAuth } from "../context/AuthContext";
 import Layout from "../components/Layout";
+import SearchProperties from "../pages/SearchProperties";
+import SavedProperties from "../pages/SavedProperties";
+import MyProfile from "../pages/MyProfile";
+import MyInquaries from "../pages/MyInquaries";
+import CreateNewListning from "../pages/CreateNewListning";
+import ManageListnings from "../pages/ManageListnings";
+import MyListings from "../pages/MyListnings";
 
 const Welcome = lazy(() => import("../pages/Welcome"))
 const Signin = lazy(() => import("../pages/Signin"))
@@ -53,6 +60,15 @@ export default function Router() {
                         }
                     >
                         <Route path="/home" element = {<Home/>}/>
+                        <Route path="/search" element= {<SearchProperties/>}/>
+                        <Route path="/favourites" element= {<SavedProperties/>}/>
+                        <Route path="/editme" element= {<MyProfile/>}/>
+                        <Route path="/inquaries" element= {<MyInquaries/>}/>
+
+                        <Route path="/createListnings" element= {<CreateNewListning/>}/>
+                        <Route path="/manageListnings" element= {<ManageListnings/>}/>
+                        <Route path="/viewAll" element= {<MyListings/>}/>
+
 
                     </Route>
                 </Routes>

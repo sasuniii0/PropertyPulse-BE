@@ -16,6 +16,42 @@ const PulseIcon = () => (
   </svg>
 );
 
+export const UserIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
+);
+
+export const HeartIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+  </svg>
+);
+
+export const ListingsIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="3" y1="6" x2="21" y2="6" />
+    <line x1="3" y1="12" x2="21" y2="12" />
+    <line x1="3" y1="18" x2="21" y2="18" />
+  </svg>
+);
+
+// CreateListingIcon.tsx
+export const CreateListingIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+    <path d="M12 5v14M5 12h14" /> {/* Plus icon for creating new listing */}
+  </svg>
+);
+
+// ManageListingIcon.tsx
+export const ManageListingIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+    <path d="M4 6h16M4 12h16M4 18h16" /> {/* List icon for managing listings */}
+  </svg>
+);
+
+
 export default function Header () {
     const navigate = useNavigate()
 
@@ -28,47 +64,116 @@ export default function Header () {
     }
 
     if (user.role === "CLIENT"){
-        return(
-                <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
-                <div className="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+        return (
+            <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+                <div className="max-w-7xl mx-auto px-6 md:px-8 py-4 flex items-center justify-between">
+
+                {/* Logo */}
+                <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/home")}>
                     <PulseIcon />
-                    <span className="font-bold text-xl text-gray-800">PropertyPulse</span>
-                    </div>
-                    <div className="flex items-center gap-4">
+                    <span className="font-bold text-xl text-gray-800 hover:text-teal-600 transition-colors">PropertyPulse</span>
+                </div>
+
+                {/* Navigation */}
+                <nav className="hidden md:flex items-center gap-6 text-gray-700">
+                    <button
+                        className="flex items-center gap-2 hover:text-teal-600 font-medium transition-colors"
+                        onClick={() => navigate("/home")}
+                        >
+                        <ListingsIcon /> Listings
+                    </button>
+                    <button
+                        className="flex items-center gap-2 hover:text-blue-600 font-medium transition-colors"
+                        onClick={() => navigate("/editme")}
+                        >
+                        <UserIcon /> My Profile
+                    </button>
+                    <button
+                        className="flex items-center gap-2 hover:text-red-600 font-medium transition-colors"
+                        onClick={() => navigate("/favourites")}
+                        >
+                        <HeartIcon /> Favorites
+                    </button>
+                    <button
+                        className="flex items-center gap-2 hover:text-purple-600 font-medium transition-colors"
+                        onClick={() => navigate("/inquaries")}
+                        >
+                        <ListingsIcon /> Inquiries
+                    </button>
+                </nav>
+
+                {/* User Info & Logout */}
+                <div className="flex items-center gap-4">
                     <span className="text-sm text-gray-600">Welcome, <strong>{user.name}</strong></span>
                     <button
                         onClick={handleLogout}
-                        className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-100 transition-all"
-                    >
-                        <LogoutIcon /> Logout
+                        className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 transition-all focus:outline-none"
+                        title="Logout"
+                        >
+                        <LogoutIcon />
                     </button>
-                    </div>
                 </div>
-                </header>
-        )
+
+                {/* Mobile menu button (optional) */}
+                {/* Add hamburger menu here if you want responsive nav */}
+                </div>
+            </header>
+        );
     }else{
         return(
-            <header>
-                {/* Header */}
-                <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
-                    <div className="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <PulseIcon />
-                        <span className="font-bold text-xl text-gray-800">PropertyPulse</span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <span className="text-sm text-gray-600">Agent: <strong>{user.name}</strong></span>
-                        <button
-                        onClick={handleLogout}
-                        className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-100 transition-all"
+            <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+                <div className="max-w-7xl mx-auto px-6 md:px-8 py-4 flex items-center justify-between">
+
+                {/* Logo */}
+                <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/home")}>
+                    <PulseIcon />
+                    <span className="font-bold text-xl text-gray-800 hover:text-teal-600 transition-colors">PropertyPulse</span>
+                </div>
+
+                {/* Navigation */}
+                <nav className="hidden md:flex items-center gap-6 text-gray-700">
+                    <button
+                        className="flex items-center gap-2 hover:text-teal-600 font-medium transition-colors"
+                        onClick={() => navigate("/home")}
                         >
-                        <LogoutIcon /> Logout
-                        </button>
-                    </div>
-                    </div>
-                </header>
+                        <CreateListingIcon /> Create New
+                    </button>
+                    <button
+                        className="flex items-center gap-2 hover:text-red-600 font-medium transition-colors"
+                        onClick={() => navigate("/favourites")}
+                        >
+                        <ManageListingIcon /> Manage Listnings
+                    </button>
+                    <button
+                        className="flex items-center gap-2 hover:text-blue-600 font-medium transition-colors"
+                        onClick={() => navigate("/editme")}
+                        >
+                        <UserIcon /> My Profile
+                    </button>
+                    <button
+                        className="flex items-center gap-2 hover:text-purple-600 font-medium transition-colors"
+                        onClick={() => navigate("/inquaries")}
+                        >
+                        <ListingsIcon /> Inquiries
+                    </button>
+                </nav>
+
+                {/* User Info & Logout */}
+                <div className="flex items-center gap-4">
+                    <span className="text-sm text-gray-600">Welcome, <strong>{user.name}</strong></span>
+                    <button
+                        onClick={handleLogout}
+                        className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 transition-all focus:outline-none"
+                        title="Logout"
+                        >
+                        <LogoutIcon />
+                    </button>
+                </div>
+
+                {/* Mobile menu button (optional) */}
+                {/* Add hamburger menu here if you want responsive nav */}
+                </div>
             </header>
-    )
+        )
     }
 }
