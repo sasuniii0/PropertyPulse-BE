@@ -1,5 +1,11 @@
 import mongoose, { Schema, Document } from "mongoose";
 
+export enum UserStatus {
+  ACTIVE = "ACTIVE",
+  PENDING = "PENDING",
+  REJECTED = "REJECTED",
+}
+
 export enum Role {
   CLIENT = "CLIENT",
   ADMIN = "ADMIN",
@@ -11,6 +17,7 @@ export interface IUser extends Document {
   email: string;
   password: string;
   role: Role;
+  status: UserStatus;
   contactNumber?: string;
   phone?: string;
   bio?: string;
@@ -31,6 +38,12 @@ const UserSchema: Schema = new Schema(
       type: String,
       enum: Object.values(Role),
       default: Role.CLIENT,
+    },
+
+    status: {
+      type: String,
+      enum: Object.values(UserStatus),
+      default: UserStatus.ACTIVE,  // For normal users
     },
 
     // Normal user fields

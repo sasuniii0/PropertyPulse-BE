@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { IUser, Role, User } from "../models/userModel";
 import { signAccessToken, signRefreshToken } from "../utils/tokens";
 import { AuthRequest } from "../middlewares/authMiddleware";
+import { UserStatus } from "../models/userModel";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
@@ -13,47 +14,58 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET as string;
 export const userRegister = async (req: Request, res: Response) => {
   try {
     const { name, email, password, contactNumber, role } = req.body;
+
+    // Validate required fields
     if (!name || !email || !password || !contactNumber || !role) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    // 2. Validate role
+    // Validate role
     if (!Object.values(Role).includes(role)) {
       return res.status(400).json({ message: "Invalid role selected" });
     }
 
+    // Check if email already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "Email Already Registered" });
     }
 
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = await User.create({
+    // Create user with approval system
+    const newUser = new User({
       name,
       email,
       password: hashedPassword,
       contactNumber,
       role,
+
+      // Agent registration requires admin approval
+      status: role === Role.AGENT ? UserStatus.PENDING : UserStatus.ACTIVE,
     });
 
     await newUser.save();
 
-    res.status(201).json({
+    return res.status(201).json({
       message:
         role === Role.AGENT
-          ? "Agent Registered successfully!"
+          ? "Agent registered successfully! Your account is pending admin approval."
           : "Client registered successfully!",
       data: {
         id: newUser._id,
         email: newUser.email,
-        Role: newUser.role,
+        role: newUser.role,
+        status: newUser.status,
       },
     });
   } catch (err: any) {
+    console.error("Register Error:", err);
     return res.status(500).json({ message: "Server Error" });
   }
 };
+
 
 export const userLogin = async (req: Request, res: Response) => {
   try {
