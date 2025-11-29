@@ -25,7 +25,7 @@ export interface IListning extends Document {
         lat: number;
         lng: number;
     }
-    images : string;
+    images : string[];
     agent : mongoose.Types.ObjectId
     status : ListingStatus
 }
@@ -36,7 +36,7 @@ const ListningSchema = new Schema (
         description : {type: String, required: true},
         price : {type: Number, required: true},
         propertyType:{
-            type: String,
+            type: [String],
             enum: Object.values(PropertyType),
             required: true,
         },
