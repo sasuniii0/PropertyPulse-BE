@@ -67,7 +67,7 @@ export default function Router() {
 
                         <Route path="/createListnings" element= {<CreateNewListning/>}/>
                         <Route path="/manageListnings" element= {<ManageListnings/>}/>
-                        <Route path="/viewAll" element= {<MyListings/>}/>
+                        <Route path="/listning/:id" element= {<MyListings/>}/>
 
 
                     </Route>

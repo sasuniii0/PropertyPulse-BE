@@ -409,7 +409,7 @@ export default function Home() {
           
           <div className="grid md:grid-cols-3 gap-6">
             {properties.map((p) => (
-              <div key={p.id} className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:-translate-y-2 cursor-pointer group border border-gray-100">
+              <div key={p.id} onClick={() => navigate(`/listning/${p.id}`)} className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:-translate-y-2 cursor-pointer group border border-gray-100">
                 <div className="relative h-48 overflow-hidden">
                   <img src={p.img} alt={p.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                 </div>
