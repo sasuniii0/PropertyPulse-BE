@@ -60,6 +60,8 @@ const ListningSchema = new Schema (
             enum: Object.values(ListingStatus),
             default: ListingStatus.PENDING,
         },
+        isActive: { type: Boolean, default: true },
+
     },
     {timestamps: true}
 )

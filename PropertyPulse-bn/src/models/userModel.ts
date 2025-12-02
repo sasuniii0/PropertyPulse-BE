@@ -15,6 +15,7 @@ export interface IUser extends Document {
   phone?: string;
   bio?: string;
   ratings?: number;
+  isActive : Boolean;
   savedListings?: mongoose.Types.ObjectId[];
   listings?: mongoose.Types.ObjectId[];
 }
@@ -42,6 +43,7 @@ const UserSchema: Schema = new Schema(
 
     // Agent-specific fields
     bio: { type: String },
+    isActive: { type: Boolean, default: true },
     ratings: { type: Number, default: 0 },
     listings: [
       { type: mongoose.Schema.Types.ObjectId, ref: "Listing" }
