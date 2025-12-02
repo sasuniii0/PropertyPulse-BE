@@ -10,4 +10,5 @@
   }}
 >
   <input type="text" placeholder="Enter property location" />
-</Autocomplete> */}
+</Autocomplete> */
+}
