@@ -177,3 +177,61 @@ export const getAgentListings = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+// SEARCH LISTINGS
+export const searchListings = async (req: Request, res: Response) => {
+  try {
+    const { q, location, bedrooms, propertyType, minPrice, maxPrice } = req.query;
+
+    let filter: any = {};
+
+    // Keyword search
+    if (q) {
+      filter.$or = [
+        { title: { $regex: q, $options: "i" } },
+        { description: { $regex: q, $options: "i" } },
+        { location: { $regex: q, $options: "i" } }
+      ];
+    }
+
+    // Location search (Google Maps string)
+    if (location) {
+      filter.location = { $regex: location, $options: "i" };
+    }
+
+    // Property Type
+    if (propertyType && propertyType !== "all") {
+      filter.propertyType = propertyType;
+    }
+
+    // Bedrooms
+    if (bedrooms && bedrooms !== "all") {
+      if (bedrooms === "4+") {
+        filter.bedrooms = { $gte: 4 };
+      } else {
+        filter.bedrooms = Number(bedrooms);
+      }
+    }
+
+    // Price Range
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
+    }
+
+    // Fetch only approved listings
+    filter.status = "APPROVED";
+
+    const results = await Listning.find(filter).populate("agent", "name email");
+
+    res.json({
+      message: "Search results",
+      data: results,
+    });
+
+  } catch (error) {
+    console.log("Search error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};

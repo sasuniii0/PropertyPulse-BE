@@ -6,7 +6,8 @@ import {
     deleteListing,
     getAgentListings,
     getAllListings,
-    getListingById
+    getListingById,
+    searchListings
 } from "../controllers/listningController";
 import { agentOnly } from "../middlewares/isAgentMiddleware";
 import { isAdmin } from "../middlewares/isAdminMiddleware";
@@ -28,5 +29,8 @@ router.get("/agent" , authenticate , agentOnly , getAgentListings);
 router.get("/" , getAllListings);
 
 router.get("/:id" ,getListingById)
+
+router.get("/search", searchListings);
+
 
 export default router;

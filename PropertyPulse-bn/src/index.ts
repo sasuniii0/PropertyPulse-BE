@@ -4,6 +4,7 @@ import adminRoute from "./routes/adminRoute"
 import userRoute from "./routes/userRoute"
 import listningRoute from "./routes/listningRoute"
 import savedListningRoute from "./routes/savedListningRoutes"
+import aiRoutes from "./routes/aiRoute"
 import cors from "cors"
 import dotenv from "dotenv"
 import mongoose from "mongoose"
@@ -27,6 +28,8 @@ app.use("/api/v1/admin" , adminRoute)
 app.use("/api/v1/user" ,userRoute)
 app.use("/api/v1/listning" , listningRoute)
 app.use("/api/v1/savedListnings" , savedListningRoute)
+app.use("/api/ai", aiRoutes);
+
 
 mongoose.connect(MONGO_URI).then(() =>{
     console.log("Connected to MongoDB")

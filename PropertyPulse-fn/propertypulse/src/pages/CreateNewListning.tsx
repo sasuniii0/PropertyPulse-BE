@@ -37,15 +37,42 @@ export default function CreateNewListing() {
     setImages(prev => prev.filter((_, i) => i !== index));
   };
 
-  const generateAISummary = () => {
-    setIsGeneratingAI(true);
-    // Simulate AI generation
-    setTimeout(() => {
-      const summary = `${formData.propertyType} with ${formData.bedrooms} bedrooms and ${formData.bathrooms} bathrooms in ${formData.address}. ${formData.size} sqft of living space. ${formData.description.substring(0, 100)}...`;
-      setAiSummary(summary);
-      setIsGeneratingAI(false);
-    }, 1500);
-  };
+  // const generateAISummary = () => {
+  //   setIsGeneratingAI(true);
+  //   // Simulate AI generation
+  //   setTimeout(() => {
+  //     const summary = `${formData.propertyType} with ${formData.bedrooms} bedrooms and ${formData.bathrooms} bathrooms in ${formData.address}. ${formData.size} sqft of living space. ${formData.description.substring(0, 100)}...`;
+  //     setAiSummary(summary);
+  //     setIsGeneratingAI(false);
+  //   }, 1500);
+  // };
+
+      const generateAISummary = async () => {
+      setIsGeneratingAI(true);
+
+      try {
+        const response = await fetch("http://localhost:5000/api/ai/generate-ai-summary", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: formData.title,
+            description: formData.description,
+            price: formData.price,
+            location: formData.address,
+            propertyType: formData.propertyType,
+            bedrooms: formData.bedrooms,
+          }),
+        });
+
+        const data = await response.json();
+        setAiSummary(data.summary);
+      } catch (err) {
+        console.log("AI summary error:", err);
+      } finally {
+        setIsGeneratingAI(false);
+      }
+    };
+
 
   const handleSubmit = () => {
     const listingData = {
@@ -140,6 +167,7 @@ export default function CreateNewListing() {
                   rows={2}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none bg-purple-50"
                 />
+
               </div>
 
               {/* Property Type */}

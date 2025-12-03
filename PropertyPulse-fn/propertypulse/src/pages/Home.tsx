@@ -90,6 +90,15 @@ export default function Home() {
             <p className="text-gray-500 mt-1">Find your dream property today</p>
           </div>
 
+          <div className="w-full h-[350px]">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126745.75055197858!2d79.786164!3d6.927079!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae2593d15db80b1%3A0x6d3ef1d3dbed1e72!2sColombo!5e0!3m2!1sen!2slk!4v1700000000000"
+              className="w-full h-full border-0 rounded-none"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            ></iframe>
+          </div>
+
           {/* Quick Actions */}
           <div className="grid md:grid-cols-4 gap-4">
             <ActionCard icon={<SearchIcon />} title="Search Properties" desc="Browse all listings" color="bg-teal-100" onClick={() => navigate("/search")} />
