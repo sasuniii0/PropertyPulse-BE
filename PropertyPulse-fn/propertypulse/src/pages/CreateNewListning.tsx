@@ -103,7 +103,7 @@ export default function CreateNewListing() {
 
       alert("Listing submitted for approval!");
       console.log(res.data);
-      navigate("/home");
+      navigate("/manageListnings");
     } catch (err: any) {
       console.error(err);
       alert(err.response?.data?.message || "Server error");

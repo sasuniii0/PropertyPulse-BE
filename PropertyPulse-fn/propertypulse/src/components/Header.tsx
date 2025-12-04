@@ -134,13 +134,13 @@ export default function Header () {
                 <nav className="hidden md:flex items-center gap-6 text-gray-700">
                     <button
                         className="flex items-center gap-2 hover:text-teal-600 font-medium transition-colors"
-                        onClick={() => navigate("/home")}
+                        onClick={() => navigate("/createListnings")}
                         >
                         <CreateListingIcon /> Create New
                     </button>
                     <button
                         className="flex items-center gap-2 hover:text-red-600 font-medium transition-colors"
-                        onClick={() => navigate("/favourites")}
+                        onClick={() => navigate("/manageListnings")}
                         >
                         <ManageListingIcon /> Manage Listnings
                     </button>

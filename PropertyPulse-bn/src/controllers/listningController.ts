@@ -171,20 +171,22 @@ export const getListingById = async (req: Request, res: Response) => {
   }
 };
 
-// GET LISTINGS OF LOGGED-IN AGENT
 export const getAgentListings = async (req: AuthRequest, res: Response) => {
   try {
-    const listings = await Listning.find({ agent: req.user?.id });
+    const listings = await Listning.find({ agent: req.user?.sub });
+    console.log("Listings found:", listings);
 
     res.json({
       message: "Agent listings fetched",
-      data: listings,
+      listings, // use 'listings' so frontend matches
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
 
 // SEARCH LISTINGS
 export const searchListings = async (req: Request, res: Response) => {
