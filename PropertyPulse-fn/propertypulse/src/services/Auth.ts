@@ -23,7 +23,16 @@ export const handleRefreshToken = async(refreshToken : string)=>{
     return res.data
 }
 
-export const getMyDetails = async() =>{
-    const res = await api.get('/auth/me')
+export const getMyDetails = async () => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) throw new Error("No access token");
+
+    const res = await api.get('/auth/me', {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
     return res.data;
-}
+};
+

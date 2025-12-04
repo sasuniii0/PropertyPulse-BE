@@ -28,7 +28,7 @@ app.use("/api/v1/admin" , adminRoute)
 app.use("/api/v1/user" ,userRoute)
 app.use("/api/v1/listning" , listningRoute)
 app.use("/api/v1/savedListnings" , savedListningRoute)
-app.use("/api/ai", aiRoutes);
+app.use("/api/v1/ai", aiRoutes);
 
 
 mongoose.connect(MONGO_URI).then(() =>{

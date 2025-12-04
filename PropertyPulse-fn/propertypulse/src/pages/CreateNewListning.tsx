@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import {ImageIcon,UploadIcon,HomeIcon,MapPinIcon,DollarIcon,XIcon,SparklesIcon} from "../components/Icons"
+import axios from 'axios';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 export default function CreateNewListing() {
   const [formData, setFormData] = useState({
@@ -37,21 +39,11 @@ export default function CreateNewListing() {
     setImages(prev => prev.filter((_, i) => i !== index));
   };
 
-  // const generateAISummary = () => {
-  //   setIsGeneratingAI(true);
-  //   // Simulate AI generation
-  //   setTimeout(() => {
-  //     const summary = `${formData.propertyType} with ${formData.bedrooms} bedrooms and ${formData.bathrooms} bathrooms in ${formData.address}. ${formData.size} sqft of living space. ${formData.description.substring(0, 100)}...`;
-  //     setAiSummary(summary);
-  //     setIsGeneratingAI(false);
-  //   }, 1500);
-  // };
-
       const generateAISummary = async () => {
       setIsGeneratingAI(true);
 
       try {
-        const response = await fetch("http://localhost:5000/api/ai/generate-ai-summary", {
+        const response = await fetch("http://localhost:5000/api/v1/ai/generate-ai-summary", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -74,26 +66,48 @@ export default function CreateNewListing() {
     };
 
 
-  const handleSubmit = () => {
-    const listingData = {
-      ...formData,
-      price: parseFloat(formData.price),
-      bedrooms: parseInt(formData.bedrooms),
-      bathrooms: parseInt(formData.bathrooms),
-      size: parseFloat(formData.size),
-      location: {
-        address: formData.address,
-        lat: parseFloat(formData.lat),
-        lng: parseFloat(formData.lng),
-      },
-      images: images,
-      aiSummary: aiSummary,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+  const handleSubmit = async () => {
+    const navigate = useNavigate();
 
-    console.log('Listing Data:', listingData);
-    alert('Listing created successfully! (Check console for data)');
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      alert("You must be logged in to create a listing.");
+      return;
+    }
+
+    console.log("Sending token:", token);
+
+    const form = new FormData();
+    form.append("title", formData.title);
+    form.append("description", formData.description);
+    form.append("price", formData.price);
+    form.append("size", formData.size);
+    form.append("propertyType", formData.propertyType);
+    form.append("location[address]", formData.address);
+    form.append("location[lat]", formData.lat);
+    form.append("location[lng]", formData.lng);
+    images.forEach(img => form.append("images", img));
+
+    try {
+      const res = await axios.post(
+        "http://localhost:5000/api/v1/listning/add",
+        form,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            
+          },
+        }
+      );
+
+      alert("Listing submitted for approval!");
+      console.log(res.data);
+      navigate("/home");
+    } catch (err: any) {
+      console.error(err);
+      alert(err.response?.data?.message || "Server error");
+    }
   };
 
   return (
@@ -181,11 +195,11 @@ export default function CreateNewListing() {
                   onChange={handleInputChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                 >
-                  <option value="House">House</option>
-                  <option value="Apartment">Apartment</option>
-                  <option value="Condo">Condo</option>
-                  <option value="Villa">Villa</option>
-                  <option value="Land">Land</option>
+                  <option value="HOUSE">House</option>
+                  <option value="APARTMENT">Apartment</option>
+                  <option value="COMMERCIAL">Commercial</option>
+                  <option value="VILLA">Villa</option>
+                  <option value="LAND">Land</option>
                 </select>
               </div>
             </div>

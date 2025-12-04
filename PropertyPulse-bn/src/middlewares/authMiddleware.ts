@@ -20,9 +20,11 @@ export const authenticate = (req:AuthRequest , res:Response , next:NextFunction)
 
     try{
         const payload = jwt.verify(token,JWT_SECRET)
+        console.log("JWT payload:", payload);
         req.user = payload
         next()
     }catch(err) {
+        console.error("JWT verify error:", err);
         return res.status(401).json({message: "Invalid or expired token"})
     }
 }

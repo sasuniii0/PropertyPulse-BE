@@ -3,19 +3,25 @@ import { PropertyType, ListingStatus, Listning } from "../models/listningModel";
 import { AuthRequest } from "../middlewares/authMiddleware";
 import cloudinary from "../config/cloudinary";
 
-// CREATE LISTING
 export const createListing = async (req: AuthRequest, res: Response) => {
   try {
-    const { title, description, price, propertyType, location } = req.body;
+    const { title, description, price, size, propertyType, location } = req.body;
 
-    // Validate property type enum
+    // Ensure user exists from JWT
+    if (!req.user?.sub) {
+      return res.status(401).json({ message: "Unauthorized: User not found" });
+    }
+
+    const agentId = req.user.sub; // <-- use JWT sub as agent
+
+    // Validate property type
     if (!Object.values(PropertyType).includes(propertyType)) {
       return res.status(400).json({ message: "Invalid Property Type" });
     }
 
     let uploadedImages: string[] = [];
 
-    // HANDLE MULTI-IMAGE UPLOAD
+    // Handle multi-image upload
     if (req.files && Array.isArray(req.files)) {
       for (const file of req.files) {
         const result: any = await new Promise((resolve, reject) => {
@@ -33,16 +39,17 @@ export const createListing = async (req: AuthRequest, res: Response) => {
       }
     }
 
-    // Create listing
+    // Create listing with agent assigned
     const listing = await Listning.create({
       title,
       description,
       price,
+      size,
       propertyType,
-      location, // Google Maps Autocomplete location field
+      location,
       images: uploadedImages,
-      agent: req.user?.id,
-      status: ListingStatus.PENDING, // goes for admin approval
+      agent: agentId,  // <-- fix: assign JWT sub
+      status: ListingStatus.PENDING,
     });
 
     res.status(201).json({
@@ -50,11 +57,12 @@ export const createListing = async (req: AuthRequest, res: Response) => {
       data: listing,
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating listing:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: error.message || "Server error" });
   }
 };
+
 
 
 // UPDATE LISTING
@@ -69,13 +77,13 @@ export const updateListing = async (req: AuthRequest, res: Response) => {
       return res.status(403).json({ message: "Unauthorized: Not your listing" });
     }
 
-    const { title, description, price, propertyType, location, images } = req.body;
+    const { title, description, price,size, propertyType, location, images } = req.body;
 
     if (propertyType && !Object.values(PropertyType).includes(propertyType)) {
       return res.status(400).json({ message: "Invalid Property Type" });
     }
 
-    let updatedData: any = { title, description, price, propertyType, location, images };
+    let updatedData: any = { title, description, price,size , propertyType, location, images };
 
     // If a new image is uploaded
     if (req.file) {
