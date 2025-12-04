@@ -21,23 +21,20 @@ export const createListing = async (req: AuthRequest, res: Response) => {
 
     let uploadedImages: string[] = [];
 
-    // Handle multi-image upload
     if (req.files && Array.isArray(req.files)) {
       for (const file of req.files) {
         const result: any = await new Promise((resolve, reject) => {
           const uploadStream = cloudinary.uploader.upload_stream(
             { folder: "listings" },
-            (err, result) => {
-              if (err) reject(err);
-              else resolve(result);
-            }
+            (err, result) => (err ? reject(err) : resolve(result))
           );
           uploadStream.end(file.buffer);
         });
-
         uploadedImages.push(result.secure_url);
       }
     }
+
+    console.log("Images to save:", uploadedImages); // <-- should log URLs
 
     // Create listing with agent assigned
     const listing = await Listning.create({

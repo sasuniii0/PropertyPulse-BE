@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import {ImageIcon,UploadIcon,HomeIcon,MapPinIcon,DollarIcon,XIcon,SparklesIcon} from "../components/Icons"
 import axios from 'axios';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export default function CreateNewListing() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -67,7 +68,6 @@ export default function CreateNewListing() {
 
 
   const handleSubmit = async () => {
-    const navigate = useNavigate();
 
     const token = localStorage.getItem("accessToken");
     if (!token) {
@@ -91,12 +91,11 @@ export default function CreateNewListing() {
     try {
       const res = await axios.post(
         "http://localhost:5000/api/v1/listning/add",
-        form,
+        form, // your FormData instance
         {
-          method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
-            
+            "Content-Type": "multipart/form-data", // important for file uploads
           },
         }
       );

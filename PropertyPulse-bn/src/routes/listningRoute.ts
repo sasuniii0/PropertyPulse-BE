@@ -18,7 +18,7 @@ import { upload } from "../middlewares/multerMiddleware";
 const router = express.Router();
 
 // Agent adds property/listing
-router.post("/add", authenticate, agentOnly, upload.array("images" , 20), createListing);
+router.post("/add", authenticate, agentOnly, upload.array("images"), createListing);
 
 router.put("/update/:id" , authenticate ,agentOnly,upload.array("images" , 20),updateListing);
 
