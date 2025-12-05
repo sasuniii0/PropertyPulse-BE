@@ -18,7 +18,7 @@ export default function CreateNewListing() {
     size: '',
   });
 
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<File[]>([]);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [aiSummary, setAiSummary] = useState('');
 
@@ -27,14 +27,14 @@ export default function CreateNewListing() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
-      // In real app, upload to server and get URLs
-      const newImages = Array.from(files).map(file => URL.createObjectURL(file));
-      setImages(prev => [...prev, ...newImages]);
+      setImages(prev => [...prev, ...Array.from(files)]);
     }
   };
+
 
   const removeImage = (index: number) => {
     setImages(prev => prev.filter((_, i) => i !== index));
@@ -68,14 +68,8 @@ export default function CreateNewListing() {
 
 
   const handleSubmit = async () => {
-
     const token = localStorage.getItem("accessToken");
-    if (!token) {
-      alert("You must be logged in to create a listing.");
-      return;
-    }
-
-    console.log("Sending token:", token);
+    if (!token) return alert("You must be logged in.");
 
     const form = new FormData();
     form.append("title", formData.title);
@@ -83,31 +77,34 @@ export default function CreateNewListing() {
     form.append("price", formData.price);
     form.append("size", formData.size);
     form.append("propertyType", formData.propertyType);
+
+    // Correct way to append nested location fields
     form.append("location[address]", formData.address);
     form.append("location[lat]", formData.lat);
     form.append("location[lng]", formData.lng);
-    images.forEach(img => form.append("images", img));
+
+    images.forEach(file => form.append("images", file));
 
     try {
       const res = await axios.post(
         "http://localhost:5000/api/v1/listning/add",
-        form, // your FormData instance
+        form,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data", // important for file uploads
+            "Content-Type": "multipart/form-data"
           },
         }
       );
-
-      alert("Listing submitted for approval!");
-      console.log(res.data);
+      alert("Listing submitted!");
       navigate("/manageListnings");
     } catch (err: any) {
-      console.error(err);
+      console.error(err.response?.data || err);
       alert(err.response?.data?.message || "Server error");
     }
   };
+
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -362,13 +359,14 @@ export default function CreateNewListing() {
             {/* Image Preview */}
             {images.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {images.map((img, index) => (
+                {images.map((file, index) => (
                   <div key={index} className="relative group">
                     <img
-                      src={img}
+                      key={index}
+                      src={URL.createObjectURL(file)}
                       alt={`Property ${index + 1}`}
                       className="w-full h-32 object-cover rounded-lg"
-                    />
+                      />
                     <button
                       type="button"
                       onClick={() => removeImage(index)}

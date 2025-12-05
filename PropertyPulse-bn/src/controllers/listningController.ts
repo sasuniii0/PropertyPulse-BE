@@ -5,47 +5,41 @@ import cloudinary from "../config/cloudinary";
 
 export const createListing = async (req: AuthRequest, res: Response) => {
   try {
-    const { title, description, price, size, propertyType, location } = req.body;
+    const { title, description, price, size, propertyType , location} = req.body;
 
-    // Ensure user exists from JWT
     if (!req.user?.sub) {
       return res.status(401).json({ message: "Unauthorized: User not found" });
     }
+    const agentId = req.user.sub;
 
-    const agentId = req.user.sub; // <-- use JWT sub as agent
-
-    // Validate property type
-    if (!Object.values(PropertyType).includes(propertyType)) {
-      return res.status(400).json({ message: "Invalid Property Type" });
-    }
-
-    let uploadedImages: string[] = [];
+    const uploadedImages: string[] = [];
 
     if (req.files && Array.isArray(req.files)) {
-      for (const file of req.files) {
-        const result: any = await new Promise((resolve, reject) => {
+      for (const file of req.files as Express.Multer.File[]) {
+        const uploaded: any = await new Promise((resolve, reject) => {
           const uploadStream = cloudinary.uploader.upload_stream(
             { folder: "listings" },
-            (err, result) => (err ? reject(err) : resolve(result))
+            (err, result) => {
+              if (err) reject(err);
+              else resolve(result);
+            }
           );
           uploadStream.end(file.buffer);
         });
-        uploadedImages.push(result.secure_url);
+
+        uploadedImages.push(uploaded.secure_url);
       }
     }
 
-    console.log("Images to save:", uploadedImages); // <-- should log URLs
-
-    // Create listing with agent assigned
     const listing = await Listning.create({
       title,
       description,
       price,
       size,
       propertyType,
-      location,
+      location, // <-- this must be an object
       images: uploadedImages,
-      agent: agentId,  // <-- fix: assign JWT sub
+      agent: agentId,
       status: ListingStatus.PENDING,
     });
 
@@ -55,11 +49,10 @@ export const createListing = async (req: AuthRequest, res: Response) => {
     });
 
   } catch (error: any) {
-    console.error("Error creating listing:", error);
+    console.error("Error:", error);
     res.status(500).json({ message: error.message || "Server error" });
   }
 };
-
 
 
 // UPDATE LISTING
