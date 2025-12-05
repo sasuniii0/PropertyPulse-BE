@@ -4,42 +4,81 @@ import ActionCard from "../components/ActionCard";
 import StatCard from "../components/StatCard";
 import InquiryCard from "../components/InquiryCard";
 import ActivityCard from "../components/ActivityCard";
+import { useState , useEffect } from "react";
+import { approveListingAPI, rejectListingAPI , getPendingListings} from "../services/Admin";
+import type { ListingData} from "../services/Admin";
 import { SettingsIcon , HomeIcon,PulseIcon,SearchIcon,HeartIcon,PlusIcon,HomeIconSmall,EditIcon,ChartIcon,UserIcon,BedIcon,BathIcon,MapPinIcon } from "../components/Icons";
+import toast from "react-hot-toast";
 
 
 export default function Home() {
   const { user, loading } = useAuth();
+  const [pendingListings, setPendingListings] = useState<ListingData[]>([]);
 
-  // Mock properties data
-  const properties = [
-    {
-      id: 1,
-      name: 'Cinnamon Gardens Villa',
-      price: '85,000,000',
-      address: 'Colombo 7, Western Province',
-      beds: 4,
-      baths: 3,
-      img: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=400&h=300&fit=crop'
-    },
-    {
-      id: 2,
-      name: 'Nuwara Eliya Hill Plot',
-      price: '18,500,000',
-      address: 'Nuwara Eliya, Central Province',
-      beds: 3,
-      baths: 2,
-      img: 'https://images.unsplash.com/photo-1628624747186-a941c476b7ef?w=400&h=300&fit=crop'
-    },
-    {
-      id: 3,
-      name: 'Marine Drive Luxury Suite',
-      price: '95,000,000',
-      address: 'Colombo 4, Western Province',
-      beds: 4,
-      baths: 3,
-      img: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400&h=300&fit=crop'
-    },
-  ];
+   useEffect(() => {
+    if (!user) return;
+
+    const fetchListings = async () => {
+      try {
+        const res = await getPendingListings(user.token);
+        console.log("Pending listings response:", res);
+        console.log("User token used:", user.token);
+        if (!user.token) {
+          throw new Error("No access token");
+        }
+        if (res.data && Array.isArray(res.data.data)) {
+          setPendingListings(res.data.data);
+        } else {
+          console.warn("Unexpected response:", res.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch pending listings:", error);
+      }
+    };
+
+    fetchListings();
+  }, [user]);
+
+    const fetchPendingListings = async () => {
+    if (!user) return;
+    try {
+      const res = await getPendingListings(user.token);
+      if (res.data && Array.isArray(res.data.data)) {
+        setPendingListings(res.data.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch pending listings:", error);
+    }
+  };
+
+  const handleApprove = async (id: string) => {
+    if (!user) return;
+
+    try {
+      await approveListingAPI(id, user.token);
+      setPendingListings(prev => prev.filter(item => item._id !== id));
+      toast.success("Listing Approved!");
+      fetchPendingListings(); // refresh UI
+    } catch (err) {
+      console.error("Approval failed:", err);
+      toast.error("Approval failed!");
+    }
+  };
+
+  const handleReject = async (id: string) => {
+    if (!user) return;
+
+    try {
+      await rejectListingAPI(id, user.token);
+      setPendingListings(prev => prev.filter(item => item._id !== id));
+      toast.success("Listing Rejected!");
+      fetchPendingListings();
+    } catch (err) {
+      console.error("Rejection failed:", err);
+      toast.error("Rejection failed!");
+    }
+  };
+
 
   if (loading) {
     return (
@@ -56,27 +95,70 @@ export default function Home() {
       </div>
     );
   }
+  const navigate = useNavigate()
 
-  // Mock data
   const recentUsers = [
-    { id: 1, name: 'Ashan Perera', role: 'Client', date: '2 hours ago', status: 'active' },
-    { id: 2, name: 'Nimal Silva', role: 'Agent', date: '5 hours ago', status: 'active' },
-    { id: 3, name: 'Kamala Dias', role: 'Client', date: '1 day ago', status: 'pending' },
+    {
+      id: 1,
+      name: "Kamal Silva",
+      role: "Client",
+      date: "2 days ago",
+      status: "active",
+    },
+    {
+      id: 2,
+      name: "Anusha Jayawardena",
+      role: "Agent",
+      date: "3 days ago",
+      status: "pending",
+    },
+    {      id: 3,
+      name: "Ravi Kumar",
+      role: "Client", 
+      date: "5 days ago",
+      status: "active",
+    },
   ];
 
-  const pendingListings = [
-    { id: 1, property: 'Galle Fort Heritage House', agent: 'Priya Fernando', date: '1 hour ago' },
-    { id: 2, property: 'Kandy Lake View Apartment', agent: 'Rohan Wickrama', date: '3 hours ago' },
-    { id: 3, property: 'Negombo Beach Villa', agent: 'Sanduni Rajapakse', date: '6 hours ago' },
+  const properties = [
+    {
+      id: 1,
+      name: "Modern Family Home",
+      address: "123 Main St, Colombo",
+      price: "25,000,000",
+      beds: 4,
+      baths: 3,
+      img: "https://via.placeholder.com/400x300",
+    },
+    {
+      id: 2,  
+      name: "Luxury Downtown Apartment",
+      address: "456 Market St, Colombo",
+      price: "18,500,000",
+      beds: 2,
+      baths: 2,
+      img: "https://via.placeholder.com/400x300",
+    },
+    {
+      id: 3,
+      name: "Cozy Suburban Cottage",
+      address: "789 Elm St, Colombo",
+      price: "12,000,000",
+      beds: 3,
+      baths: 2,
+      img: "https://via.placeholder.com/400x300",
+    },
   ];
 
   const topAgents = [
-    { rank: 1, name: 'Kasun Rajapakse', sales: 23, value: '156M', badge: '🥇' },
-    { rank: 2, name: 'Sanduni Fernando', sales: 18, value: '124M', badge: '🥈' },
-    { rank: 3, name: 'Rohan Wickramasinghe', sales: 15, value: '98M', badge: '🥉' },
+    {
+      rank: 1,
+      name: "Nimal Perera",
+      sales: 34,
+      value: "150M",
+      badge: "🥇",
+    },
   ];
-
-  const navigate = useNavigate()
 
   // CLIENT DASHBOARD
   if (user.role === "CLIENT") {
@@ -250,25 +332,48 @@ export default function Home() {
           </div>
           <div className="space-y-3">
             {pendingListings.map((listing) => (
-              <div key={listing.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-teal-300 transition-all">
+              <div
+                key={listing._id}
+                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200"
+              >
+                {/* Listing Title */}
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900">{listing.property}</h3>
-                  <p className="text-sm text-gray-500">Agent: {listing.agent} • Submitted {listing.date}</p>
+                  <h3 className="font-semibold text-gray-900">
+                    {listing.title || "Untitled Listing"}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Property Type: {listing.propertyType || "N/A"}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Agent:{" "}
+                    {listing.agent
+                      ? typeof listing.agent === "object"
+                        ? listing.agent.name
+                        : listing.agent
+                      : "Unknown"}
+                  </p>
                 </div>
+
+                {/* Action Buttons */}
                 <div className="flex gap-2">
-                  <button className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-all">
+                  <button
+                    className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm"
+                    onClick={() => handleApprove(listing._id)}
+                  >
                     Approve
                   </button>
-                  <button className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-all">
+
+                  <button
+                    className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm"
+                    onClick={() => handleReject(listing._id)}
+                  >
                     Reject
-                  </button>
-                  <button className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-all">
-                    Review
                   </button>
                 </div>
               </div>
             ))}
           </div>
+
         </div>
 
         {/* Recent Users & Activity Grid */}

@@ -4,8 +4,10 @@ import { User } from "../models/userModel";
 
 export const approveListing = async (req: Request, res: Response) => {
   try {
+    const listingId = req.body.id;
+
     const listing = await Listning.findByIdAndUpdate(
-      req.params.id,
+      listingId,
       { status: ListingStatus.APPROVED },
       { new: true }
     );
@@ -23,8 +25,10 @@ export const approveListing = async (req: Request, res: Response) => {
 
 export const rejectListing = async (req: Request, res: Response) => {
   try {
+    const listingId = req.body.id;
+
     const listing = await Listning.findByIdAndUpdate(
-      req.params.id,
+      listingId,
       { status: ListingStatus.REJECTED },
       { new: true }
     );
@@ -36,6 +40,15 @@ export const rejectListing = async (req: Request, res: Response) => {
     res.json({ message: "Listing Rejected", data: listing });
 
   } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getPendingListnings = async (req: Request, res: Response) => {
+  try {
+    const pendingListings = await Listning.find({ status: ListingStatus.PENDING }).populate("agent", "name email");
+    res.json({ message: "Pending Listings fetched", data: pendingListings });
+  }catch (error) {
     res.status(500).json({ message: "Server error" });
   }
 };

@@ -23,8 +23,7 @@ export const handleRefreshToken = async(refreshToken : string)=>{
     return res.data
 }
 
-export const getMyDetails = async () => {
-    const token = localStorage.getItem("accessToken");
+export const getMyDetails = async (token : string) => {
     if (!token) throw new Error("No access token");
 
     const res = await api.get('/auth/me', {
