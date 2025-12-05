@@ -64,3 +64,24 @@ export const deleteAccount = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+export const getMyDetails = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user?.sub) {
+      return res.status(401).json({ message: "Unauthorized, user not found in request" });
+    }
+
+    const user = await User.findById(req.user.sub).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({ message: "User details fetched", data: user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+

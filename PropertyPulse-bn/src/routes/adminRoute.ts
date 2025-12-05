@@ -10,6 +10,6 @@ router.post("/reject",authenticate , isAdmin , rejectListing)
 router.get("/pending-listnings", authenticate, isAdmin, getPendingListnings)
 router.put("/agents/:id/deactivate",authenticate, isAdmin, deactivateAgent)
 router.put("/agents/:id/active" , authenticate , isAdmin , activateAgent)
-router.get("/agents" , isAdmin , getAllAgents)
+router.get("/agents" , authenticate, isAdmin , getAllAgents)
 
 export default router;

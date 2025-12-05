@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { HomeIcon } from "lucide-react";
 
 const LogoutIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -119,7 +120,7 @@ export default function Header () {
                 </div>
             </header>
         );
-    }else{
+    }else if(user.role === "AGENT"){
         return(
             <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
                 <div className="max-w-7xl mx-auto px-6 md:px-8 py-4 flex items-center justify-between">
@@ -172,6 +173,50 @@ export default function Header () {
 
                 {/* Mobile menu button (optional) */}
                 {/* Add hamburger menu here if you want responsive nav */}
+                </div>
+            </header>
+        )
+    }else if(user.role === "ADMIN"){
+        return(
+            <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+                <div className="max-w-7xl mx-auto px-6 md:px-8 py-4 flex items-center justify-between">
+                {/* Logo */}
+                <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/home")}>
+                    <PulseIcon />
+                    <span className="font-bold text-xl text-gray-800 hover:text-teal-600 transition-colors">PropertyPulse</span>
+                </div>
+                {/* Navigation */}
+                <nav className="hidden md:flex items-center gap-6 text-gray-700">
+                    <button 
+                        className="flex items-center gap-2 hover:text-blue-600 font-medium transition-colors"
+                        onClick={() => navigate("/admin/manage-users")}
+                        >
+                        <UserIcon /> Manage Users
+                    </button>
+                    <button 
+                        className="flex items-center gap-2 hover:text-blue-600 font-medium transition-colors"
+                        onClick={() => navigate("/listning/")}
+                        >
+                        <HomeIcon /> Property Approvals
+                    </button>
+                    <button
+                        className="flex items-center gap-2 hover:text-blue-600 font-medium transition-colors"
+                        onClick={() => navigate("/editme")}
+                        >
+                        <UserIcon /> My Profile
+                    </button>
+                </nav>
+                {/* User Info & Logout */}
+                <div className="flex items-center gap-4">
+                    <span className="text-sm text-gray-600">Welcome, <strong>{user.name}</strong></span>
+                    <button
+                        onClick={handleLogout}
+                        className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 transition-all focus:outline-none"
+                        title="Logout"
+                        >
+                        <LogoutIcon />
+                    </button>
+                </div>
                 </div>
             </header>
         )

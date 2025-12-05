@@ -26,7 +26,7 @@ router.delete("/delete/:id" , authenticate , agentOnly ,deleteListing);
 
 router.get("/agent" , authenticate , agentOnly , getAgentListings);
 
-router.get("/" , getAllListings);
+router.get("/" , getAllListings, authenticate);
 
 router.get("/:id" ,getListingById)
 

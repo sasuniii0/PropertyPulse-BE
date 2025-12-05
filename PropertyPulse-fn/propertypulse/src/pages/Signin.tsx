@@ -44,7 +44,7 @@ export default function Signin() {
       await localStorage.setItem("accessToken" , res.data.accessToken)
       await localStorage.setItem("refreshToken" , res.data.refreshToken)
 
-      const details = await getMyDetails()
+      const details = await getMyDetails(res.data.accessToken)
       setUser(details.data)
 
       alert("Login successfull!")

@@ -293,7 +293,8 @@ export default function Home() {
             icon={<UserIcon />} 
             title="Manage Users" 
             desc="View all users & roles" 
-            color="bg-blue-100" 
+            color="bg-blue-100"
+            onClick={() => navigate("/admin/manage-users")} 
             
           />
           <ActionCard 
