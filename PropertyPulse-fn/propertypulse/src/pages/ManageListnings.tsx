@@ -1,6 +1,23 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { SearchIcon, TrashIcon, EyeIcon, SquareIcon, ToggleLeftIcon, ToggleRightIcon, PlusIcon, BedIcon, BathIcon, MapPinIcon, EditIcon } from '../components/Icons';
+import {
+  SearchIcon,
+  TrashIcon,
+  EyeIcon,
+  SquareIcon,
+  ToggleLeftIcon,
+  ToggleRightIcon,
+  PlusIcon,
+  BedIcon,
+  BathIcon,
+  MapPinIcon,
+  EditIcon
+} from '../components/Icons';
+import { getAllListingsAPI, updateListingAPI, deleteListingAPI } from '../services/Listning';
+import type { EdiitListningData } from '../services/Listning';
+import Modal from '../components/Modal';
+import EditMap from '../components/Map';
+import 'maplibre-gl/dist/maplibre-gl.css';
+
 
 export default function ManageListings() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -10,61 +27,129 @@ export default function ManageListings() {
   const [error, setError] = useState('');
   const [listings, setListings] = useState<any[]>([]);
 
-  useEffect(() => {
-    const fetchListings = async () => {
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [editData, setEditData] = useState<EdiitListningData | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [mapLocation, setMapLocation] = useState({
+    lat: editData?.location?.lat || 6.9271, 
+    lng: editData?.location?.lng || 79.8612,
+  });
+
+
+
+  // Fetch listings
+useEffect(() => {
+  const fetchListings = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
       const token = localStorage.getItem('accessToken');
-      if (!token) {
-        setError('You must be logged in.');
-        setLoading(false);
-        return;
+      if (!token) throw new Error('No access token found');
+
+      const res = await getAllListingsAPI(token);
+
+      // Map backend _id to id for frontend usage
+      console.log(res.data);
+      const dataWithId = res.data.listings.map((item: any) => ({
+        ...item,
+        id: item._id,
+      }));
+
+      setListings(dataWithId);
+
+    } catch (err: any) {
+      console.error('Failed to load listings:', err);
+
+      if (err.response?.status === 403) {
+        setError('You are not authorized to view these listings.');
+      } else {
+        setError('Failed to load listings');
       }
-
-      try {
-        const res = await axios.get('http://localhost:5000/api/v1/listning/agent', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-
-          
-        console.log("Fetched listings response:", res.data);
-        setListings(res.data.listings);
-
-        // Map MongoDB _id to id
-        const fetchedListings = res.data.listings.map((listing: any) => ({
-          ...listing,
-          id: listing._id
-        }));
-
-        setListings(fetchedListings);
-      } catch (err: any) {
-        console.error(err);
-        setError(err.response?.data?.message || 'Failed to load listings.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchListings();
-  }, []);
-
-  const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this listing?')) {
-      setListings(listings.filter(l => l.id !== id));
+    } finally {
+      setLoading(false);
     }
   };
 
+  fetchListings();
+}, []);
+
+  // Toggle listing active/inactive
   const toggleStatus = (id: string) => {
     setListings(listings.map(l => 
       l.id === id ? { ...l, status: l.status === 'active' ? 'inactive' : 'active' } : l
     ));
   };
 
+  // Open delete modal
+  const handleDelete = (id: string) => {
+    setDeleteId(id);
+  };
+
+  // Confirm delete API
+  const confirmDelete = async () => {
+    if (!deleteId) return;
+
+    try {
+      const token = localStorage.getItem('accessToken')!;
+      await deleteListingAPI(token, deleteId);
+      setListings(prev => prev.filter(l => l.id !== deleteId));
+      setDeleteId(null);
+    } catch (err) {
+      console.error(err);
+      alert('Delete failed');
+    }
+  };
+
+  // Open edit modal
+const handleEdit = (listing: any) => {
+  setEditData({
+    _id: listing.id,
+    title: listing.title,
+    propertyType: listing.propertyType,
+    images: listing.images,
+    price: listing.price,
+    bedrooms: listing.bedrooms,
+    bathrooms: listing.bathrooms,
+    size: listing.size,
+    description: listing.description,
+    location: {
+      address: listing.location?.address || '',
+      lat: listing.location?.lat || 0,
+      lng: listing.location?.lng || 0,
+    },
+  });
+};
+
+
+  // Save edited listing
+  const saveEdit = async () => {
+    if (!editData) return;
+    setSaving(true);
+
+    try {
+      const token = localStorage.getItem('accessToken')!;
+      await updateListingAPI(token, editData._id, editData);
+
+      setListings(prev =>
+        prev.map(l => (l.id === editData._id ? { ...l, ...editData } : l))
+      );
+
+      setEditData(null);
+    } catch (err) {
+      console.error(err);
+      alert('Update failed');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Filtered listings
   const filteredListings = listings.filter(listing => {
     const matchesSearch =
       listing.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       listing.location?.address?.toLowerCase().includes(searchTerm.toLowerCase());
-
     const matchesType = filterType === 'all' || listing.propertyType === filterType;
-
     return matchesSearch && matchesType;
   });
 
@@ -127,13 +212,13 @@ export default function ManageListings() {
                 type="text"
                 placeholder="Search listings..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={e => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
               />
             </div>
             <select
               value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
+              onChange={e => setFilterType(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             >
               <option value="all">All Types</option>
@@ -167,7 +252,7 @@ export default function ManageListings() {
         {/* Listings */}
         {viewMode === 'grid' ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredListings.map((listing) => (
+            {filteredListings.map(listing => (
               <div key={listing.id} className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="relative h-48">
                   <img src={listing.images?.[0]} alt={listing.title} className="w-full h-full object-cover" />
@@ -205,7 +290,10 @@ export default function ManageListings() {
                       {listing.status === 'active' ? <ToggleLeftIcon /> : <ToggleRightIcon />}
                       {listing.status === 'active' ? 'Deactivate' : 'Activate'}
                     </button>
-                    <button className="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors">
+                    <button
+                      onClick={() => handleEdit(listing)}
+                      className="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors"
+                    >
                       <EditIcon />
                     </button>
                     <button
@@ -220,8 +308,9 @@ export default function ManageListings() {
             ))}
           </div>
         ) : (
+          // LIST VIEW
           <div className="space-y-4">
-            {filteredListings.map((listing) => (
+            {filteredListings.map(listing => (
               <div key={listing.id} className="bg-white rounded-xl shadow-md border border-gray-100 p-6 hover:shadow-lg transition-shadow">
                 <div className="flex gap-6">
                   <div className="w-48 h-32 rounded-lg overflow-hidden flex-shrink-0">
@@ -261,7 +350,10 @@ export default function ManageListings() {
                           {listing.status === 'active' ? <ToggleLeftIcon /> : <ToggleRightIcon />}
                           {listing.status === 'active' ? 'Deactivate' : 'Activate'}
                         </button>
-                        <button className="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors">
+                        <button
+                          onClick={() => handleEdit(listing)}
+                          className="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors"
+                        >
                           <EditIcon />
                         </button>
                         <button
@@ -278,6 +370,200 @@ export default function ManageListings() {
             ))}
           </div>
         )}
+
+        {/* DELETE MODAL */}
+        {deleteId && (
+          <Modal onClose={() => setDeleteId(null)} title="Confirm Delete">
+            <p>Are you sure you want to delete this listing?</p>
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                onClick={() => setDeleteId(null)}
+                className="px-4 py-2 bg-gray-200 rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg"
+              >
+                Delete
+              </button>
+            </div>
+          </Modal>
+        )}
+
+        {/* EDIT MODAL */}
+        {editData && (
+            <Modal onClose={() => setEditData(null)} title="Edit Listing" className="w-full max-w-5xl h-[90vh] overflow-y-auto">
+            <div className="space-y-4">
+              {/* Title */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Title</label>
+                <input
+                  type="text"
+                  value={editData.title}
+                  onChange={e => setEditData({ ...editData, title: e.target.value })}
+                  className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2"
+                />
+              </div>
+
+              {/* Images */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Images</label>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={e => {
+                    if (e.target.files) {
+                      const files = Array.from(e.target.files);
+                      const urls = files.map(f => URL.createObjectURL(f));
+                      setEditData({ ...editData, images: [...(editData.images || []), ...urls] });
+                    }
+                  }}
+                  className="mt-1 block w-full"
+                />
+                <div className="flex gap-2 mt-2 overflow-x-auto">
+                  {editData.images?.map((img, i) => (
+                    <div key={i} className="relative">
+                      <img src={img} alt={`preview-${i}`} className="w-24 h-24 object-cover rounded-lg" />
+                      <button
+                        onClick={() => {
+                          const newImages = editData.images!.filter((_, idx) => idx !== i);
+                          setEditData({ ...editData, images: newImages });
+                        }}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 text-xs"
+                      >
+                        <TrashIcon />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Price */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Price</label>
+                <input
+                  type="number"
+                  value={editData.price}
+                  onChange={e => setEditData({ ...editData, price: Number(e.target.value) })}
+                  className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2"
+                />
+              </div>
+
+              {/* Location with Map */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Location</label>
+
+                {/* Address Input */}
+                <input
+                  type="text"
+                  placeholder="Enter property address"
+                  value={editData.location?.address || ''}
+                  onChange={e =>
+                    setEditData({
+                      ...editData,
+                      location: { ...editData.location, address: e.target.value },
+                    })
+                  }
+                  className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                />
+
+                {/* Map Container */}
+                <div className="relative w-full h-64 rounded-lg overflow-hidden border border-gray-300 shadow-sm mt-2">
+                  {editData.location && (
+                    <EditMap
+                      location={{
+                        lat: editData.location?.lat || 6.9271,
+                        lng: editData.location?.lng || 79.8612,
+                      }}
+                      setLocation={loc =>
+                        setEditData({ ...editData, location: { ...editData.location, ...loc } })
+                      }
+                    />
+                  )}
+
+                  {/* Lat/Lng & Address Overlay */}
+                  <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm p-2 rounded-md shadow text-xs text-gray-700 flex flex-col gap-1">
+                    <div className="font-medium text-gray-800">{editData.location?.address || 'No Address'}</div>
+                    <div className="flex gap-4">
+                      <div>
+                        <span className="font-semibold">Lat:</span>{' '}
+                        {editData.location?.lat?.toFixed(6) ?? 'N/A'}
+                      </div>
+                      <div>
+                        <span className="font-semibold">Lng:</span>{' '}
+                        {editData.location?.lng?.toFixed(6) ?? 'N/A'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+
+              {/* Bedrooms, Bathrooms, Size */}
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700">Bedrooms</label>
+                  <input
+                    type="number"
+                    value={editData.bedrooms}
+                    onChange={e => setEditData({ ...editData, bedrooms: Number(e.target.value) })}
+                    className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700">Bathrooms</label>
+                  <input
+                    type="number"
+                    value={editData.bathrooms}
+                    onChange={e => setEditData({ ...editData, bathrooms: Number(e.target.value) })}
+                    className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700">Size (sqft)</label>
+                  <input
+                    type="number"
+                    value={editData.size}
+                    onChange={e => setEditData({ ...editData, size: Number(e.target.value) })}
+                    className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2"
+                  />
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Description</label>
+                <textarea
+                  value={editData.description}
+                  onChange={e => setEditData({ ...editData, description: e.target.value })}
+                  className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2"
+                />
+              </div>
+
+              {/* Buttons */}
+              <div className="flex justify-end gap-2 mt-4">
+                <button
+                  onClick={() => setEditData(null)}
+                  className="px-4 py-2 bg-gray-200 rounded-lg"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={saveEdit}
+                  disabled={saving}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+                >
+                  {saving ? 'Saving...' : 'Save'}
+                </button>
+              </div>
+            </div>
+          </Modal>
+        )}
+
       </main>
     </div>
   );

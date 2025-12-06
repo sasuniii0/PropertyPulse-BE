@@ -1,0 +1,39 @@
+// EditMap.tsx
+import Map, { Marker } from 'react-map-gl';
+import type { MapRef } from 'react-map-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import { useRef, useEffect } from 'react';
+
+interface MapProps {
+  location: { lat: number; lng: number };
+  setLocation: (loc: { lat: number; lng: number }) => void;
+}
+
+export default function EditMap({ location, setLocation }: MapProps) {
+  const mapRef = useRef<MapRef>(null);
+
+  // Trigger resize after modal is fully rendered
+  useEffect(() => {
+    setTimeout(() => {
+      mapRef.current?.resize();
+    }, 100); // slight delay to ensure modal DOM is visible
+  }, []);
+
+  return (
+    <div className="w-full h-full rounded-lg overflow-hidden border border-gray-300">
+      <Map
+        ref={mapRef}
+        initialViewState={{
+          latitude: location.lat,
+          longitude: location.lng,
+          zoom: 13,
+        }}
+        style={{ width: '100%', height: '100%' }}
+        mapStyle="https://demotiles.maplibre.org/style.json"
+        onClick={evt => setLocation({ lat: evt.lngLat.lat, lng: evt.lngLat.lng })}
+      >
+        <Marker latitude={location.lat} longitude={location.lng} />
+      </Map>
+    </div>
+  );
+}
