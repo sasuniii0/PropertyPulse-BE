@@ -12,7 +12,7 @@ import {
 import { agentOnly } from "../middlewares/isAgentMiddleware";
 import { isAdmin } from "../middlewares/isAdminMiddleware";
 import { authenticate } from "../middlewares/authMiddleware";
-import { approveListing,rejectListing } from "../controllers/adminController";
+import { approveListing,rejectListing } from "../controllers/adminController";  
 import { upload } from "../middlewares/multerMiddleware";
 
 const router = express.Router();

@@ -1,8 +1,9 @@
 // EditMap.tsx
-import Map, { Marker } from 'react-map-gl';
-import type { MapRef } from 'react-map-gl';
+import type { MapRef } from "react-map-gl/maplibre";
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useRef, useEffect } from 'react';
+import Map, { Marker, NavigationControl } from "react-map-gl/maplibre";
+
 
 interface MapProps {
   location: { lat: number; lng: number };
@@ -16,8 +17,9 @@ export default function EditMap({ location, setLocation }: MapProps) {
   useEffect(() => {
     setTimeout(() => {
       mapRef.current?.resize();
-    }, 100); // slight delay to ensure modal DOM is visible
-  }, []);
+    }, 200);
+  }, [location]);
+
 
   return (
     <div className="w-full h-full rounded-lg overflow-hidden border border-gray-300">
@@ -29,7 +31,8 @@ export default function EditMap({ location, setLocation }: MapProps) {
           zoom: 13,
         }}
         style={{ width: '100%', height: '100%' }}
-        mapStyle="https://demotiles.maplibre.org/style.json"
+        mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+        interactiveLayerIds={[]}
         onClick={evt => setLocation({ lat: evt.lngLat.lat, lng: evt.lngLat.lng })}
       >
         <Marker latitude={location.lat} longitude={location.lng} />
