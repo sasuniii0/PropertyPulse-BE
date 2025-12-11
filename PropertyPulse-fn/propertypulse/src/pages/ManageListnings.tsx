@@ -121,28 +121,47 @@ const handleEdit = (listing: any) => {
   });
 };
 
+const saveEdit = async () => {
+  if (!editData) return;
+  setSaving(true);
 
-  // Save edited listing
-  const saveEdit = async () => {
-    if (!editData) return;
-    setSaving(true);
+  try {
+    const token = localStorage.getItem('accessToken')!;
+    
+    // Remove local file handling
+    const dataToSend: Partial<EdiitListningData> = {
+      title: editData.title,
+      description: editData.description,
+      price: editData.price,
+      size: editData.size,
+      propertyType: editData.propertyType,
+      bedrooms: editData.bedrooms,
+      bathrooms: editData.bathrooms,
+      location: editData.location,
+      images: editData.images, // just URLs from Cloudinary
+    };
 
-    try {
-      const token = localStorage.getItem('accessToken')!;
-      await updateListingAPI(token, editData._id, editData);
+    await updateListingAPI(token, editData._id, dataToSend);
 
-      setListings(prev =>
-        prev.map(l => (l.id === editData._id ? { ...l, ...editData } : l))
-      );
+    // Update frontend list
+    setListings(prev =>
+      prev.map(l =>
+        l.id === editData._id
+          ? { ...l, ...dataToSend }
+          : l
+      )
+    );
 
-      setEditData(null);
-    } catch (err) {
-      console.error(err);
-      alert('Update failed');
-    } finally {
-      setSaving(false);
-    }
-  };
+    setEditData(null);
+  } catch (err) {
+    console.error(err);
+    alert('Update failed');
+  } finally {
+    setSaving(false);
+  }
+};
+
+
 
   // Filtered listings
   const filteredListings = listings.filter(listing => {
@@ -410,19 +429,7 @@ const handleEdit = (listing: any) => {
               {/* Images */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">Images</label>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={e => {
-                    if (e.target.files) {
-                      const files = Array.from(e.target.files);
-                      const urls = files.map(f => URL.createObjectURL(f));
-                      setEditData({ ...editData, images: [...(editData.images || []), ...urls] });
-                    }
-                  }}
-                  className="mt-1 block w-full"
-                />
+                
                 <div className="flex gap-2 mt-2 overflow-x-auto">
                   {editData.images?.map((img, i) => (
                     <div key={i} className="relative">

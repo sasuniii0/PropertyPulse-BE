@@ -63,7 +63,7 @@ export const updateListing = async (req: AuthRequest, res: Response) => {
     const listing = await Listning.findById(listingId);
     if (!listing) return res.status(404).json({ message: "Listing not found" });
 
-    if (listing.agent.toString() !== req.user?.id) {
+    if (listing.agent.toString() !== req.user?.sub) {
       return res.status(403).json({ message: "Unauthorized: Not your listing" });
     }
 
@@ -75,20 +75,27 @@ export const updateListing = async (req: AuthRequest, res: Response) => {
 
     let updatedData: any = { title, description, price,size , propertyType, location, images };
 
-    // If a new image is uploaded
-    if (req.file) {
-      const uploadResult: any = await new Promise((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-          { folder: "listings" },
-          (error, result) => {
-            if (error) return reject(error);
-            resolve(result);
-          }
-        );
-        uploadStream.end(req.file?.buffer);
-      });
+    const uploadedImages: string[] = [];
 
-      updatedData.images = uploadResult.secure_url;
+    if (req.files && Array.isArray(req.files)) {
+      for (const file of req.files as Express.Multer.File[]) {
+        const uploaded: any = await new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            { folder: "listings" },
+            (err, result) => {
+              if (err) reject(err);
+              else resolve(result);
+            }
+          );
+          uploadStream.end(file.buffer);
+        });
+
+        uploadedImages.push(uploaded.secure_url);
+      }
+    }
+
+    if (uploadedImages.length > 0) {
+      updatedData.images = uploadedImages;
     }
 
     const updatedListing = await Listning.findByIdAndUpdate(listingId, updatedData, {
@@ -235,3 +242,15 @@ export const searchListings = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+export const approvedListning = async (req: AuthRequest, res: Response) => {
+  try {
+    const listings = await Listning.find({ status: ListingStatus.APPROVED }).populate("agent", "name email");
+    res.json({
+      message: "Approved listings fetched",
+      data: listings,
+    });
+  } catch (error) {
+      console.log("Search error:", error);
+  }
+}

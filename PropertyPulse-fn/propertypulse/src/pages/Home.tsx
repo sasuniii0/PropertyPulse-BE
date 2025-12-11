@@ -4,16 +4,29 @@ import ActionCard from "../components/ActionCard";
 import StatCard from "../components/StatCard";
 import InquiryCard from "../components/InquiryCard";
 import ActivityCard from "../components/ActivityCard";
-import { useState , useEffect } from "react";
+import { useState , useEffect, use } from "react";
 import { approveListingAPI, rejectListingAPI , getPendingListings} from "../services/Admin";
 import type { ListingData} from "../services/Admin";
 import { SettingsIcon , HomeIcon,PulseIcon,SearchIcon,HeartIcon,PlusIcon,HomeIconSmall,EditIcon,ChartIcon,UserIcon,BedIcon,BathIcon,MapPinIcon } from "../components/Icons";
 import toast from "react-hot-toast";
+import { getAllListingsAPI, getApprovedListingsAPI, getMyListningsAPI, type EdiitListningData } from "../services/Listning";
 
 
 export default function Home() {
   const { user, loading } = useAuth();
   const [pendingListings, setPendingListings] = useState<ListingData[]>([]);
+  const [myListings, setMyListings] = useState<EdiitListningData[]>([]);
+  const [properties, setProperties] = useState<EdiitListningData[]>([]);
+  const [approvedListings, setApprovedListings] = useState<EdiitListningData[]>([]);
+
+
+  const [preview, setPreview] = useState<string | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+    const file = e.target.files[0];
+    setPreview(URL.createObjectURL(file)); // only for preview in browser
+  };
 
    useEffect(() => {
     if (!user) return;
@@ -120,35 +133,56 @@ export default function Home() {
     },
   ];
 
-  const properties = [
-    {
-      id: 1,
-      name: "Modern Family Home",
-      address: "123 Main St, Colombo",
-      price: "25,000,000",
-      beds: 4,
-      baths: 3,
-      img: "https://via.placeholder.com/400x300",
-    },
-    {
-      id: 2,  
-      name: "Luxury Downtown Apartment",
-      address: "456 Market St, Colombo",
-      price: "18,500,000",
-      beds: 2,
-      baths: 2,
-      img: "https://via.placeholder.com/400x300",
-    },
-    {
-      id: 3,
-      name: "Cozy Suburban Cottage",
-      address: "789 Elm St, Colombo",
-      price: "12,000,000",
-      beds: 3,
-      baths: 2,
-      img: "https://via.placeholder.com/400x300",
-    },
-  ];
+  useEffect(() => {
+  if (!user) return;
+
+  const loadAvailableProperties = async () => {
+      try {
+        const res = await getAllListingsAPI(user.token);
+        if (res.data && Array.isArray(res.data.data)) {
+          setProperties(res.data.data); // <- set all listings for client
+        } else {
+          console.warn("Unexpected response from getAllListingsAPI:", res.data);
+        }
+      } catch (err) {
+        console.error("Failed to load available properties:", err);
+      }
+    };
+
+    loadAvailableProperties();
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const loadAgentListings = async () => {
+      if (user.role === "AGENT") {
+        try {
+          const res = await getMyListningsAPI(user.token);
+          if (res.data && Array.isArray(res.data.data)) {
+            setMyListings(res.data.data); // <- only agent listings
+          }
+        } catch (err) {
+          console.error("Failed to load agent listings:", err);
+        }
+      }
+    };
+
+    loadAgentListings();
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    const loadApprovedListings = async () => {
+      try {
+        const data = await getApprovedListingsAPI(user.token);
+        setApprovedListings(data);
+      } catch (err) {
+        console.error("Failed to fetch approved listings:", err);
+      }
+    };
+    loadApprovedListings();
+  }, [user]);
 
   const topAgents = [
     {
@@ -159,6 +193,15 @@ export default function Home() {
       badge: "🥇",
     },
   ];
+
+  useEffect(() => {
+  return () => {
+    if (preview) {
+      URL.revokeObjectURL(preview);
+    }
+  };
+}, [preview]);
+
 
   // CLIENT DASHBOARD
   if (user.role === "CLIENT") {
@@ -193,24 +236,52 @@ export default function Home() {
           <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-6">Available Properties</h2>
             <div className="grid md:grid-cols-3 gap-6">
-              {properties.map((p) => (
-                <div key={p.id} className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:-translate-y-2 cursor-pointer group border border-gray-100">
+              {approvedListings.map((p) => (
+                <div 
+                  key={p._id} 
+                  className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:-translate-y-2 cursor-pointer group border border-gray-100"
+                >
                   <div className="relative h-48 overflow-hidden">
-                    <img src={p.img} alt={p.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                    <img 
+                      src={p.images && p.images.length > 0 
+                          ? p.images[0] 
+                          : "/placeholder.png"} 
+                      alt={p.title || "Property Image"} 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                      onError={(e) => {
+                        // fallback if image URL fails
+                        (e.currentTarget as HTMLImageElement).src = "/placeholder.png";
+                      }}
+                    />
                   </div>
+                  {preview && (
+                    <div className="mt-4 w-48 h-48 border border-gray-200 rounded-lg overflow-hidden">
+                      <img 
+                        src={preview} 
+                        alt="Preview" 
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = "/placeholder.png";
+                        }}
+                      />
+                    </div>
+                  )}
+
                   <div className="p-5">
                     <div className="flex items-center gap-1 text-xs text-gray-400 mb-2">
                       <MapPinIcon />
-                      {p.address}
+                      {p.location?.address || "Unknown Address"}
                     </div>
                     <div className="flex justify-between items-start mb-3">
                       <div>
-                        <h3 className="font-bold text-gray-900 text-base">{p.name}</h3>
-                        <p className="text-teal-600 font-bold text-lg mt-1">LKR {p.price}</p>
+                        <h3 className="font-bold text-gray-900 text-base">{p.title || "Untitled"}</h3>
+                        <p className="text-teal-600 font-bold text-lg mt-1">
+                          LKR {p.price?.toLocaleString() || "N/A"}
+                        </p>
                       </div>
                       <div className="flex gap-3 text-gray-500 text-sm">
-                        <span className="flex items-center gap-1"><BedIcon /> {p.beds}</span>
-                        <span className="flex items-center gap-1"><BathIcon /> {p.baths}</span>
+                        <span className="flex items-center gap-1"><BedIcon /> {p.bedrooms || 0}</span>
+                        <span className="flex items-center gap-1"><BathIcon /> {p.bathrooms || 0}</span>
                       </div>
                     </div>
                     <button className="w-full bg-teal-500 hover:bg-teal-600 text-white py-2 rounded-lg transition-all text-sm font-medium">
@@ -221,6 +292,7 @@ export default function Home() {
               ))}
             </div>
           </div>
+
 
           {/* Market Overview */}
           <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6">
@@ -522,25 +594,40 @@ export default function Home() {
             <button className="text-teal-600 text-sm font-medium hover:underline">View All</button>
           </div>
           
+          {/* My Active Listings */}
           <div className="grid md:grid-cols-3 gap-6">
-            {properties.map((p) => (
-              <div key={p.id} onClick={() => navigate(`/listning/${p.id}`)} className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:-translate-y-2 cursor-pointer group border border-gray-100">
+            {myListings.map((p) => (
+              <div
+                key={p._id}
+                onClick={() => navigate(`/listning/${p._id}`)}
+                className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:-translate-y-2 cursor-pointer group border border-gray-100"
+              >
                 <div className="relative h-48 overflow-hidden">
-                  <img src={p.img} alt={p.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <img
+                    src={p.images && p.images.length > 0 ? p.images[0] : "/placeholder.png"}
+                    alt={p.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
                 </div>
                 <div className="p-5">
                   <div className="flex items-center gap-1 text-xs text-gray-400 mb-2">
                     <MapPinIcon />
-                    {p.address}
+                    {p.location?.address || "Unknown Address"}
                   </div>
                   <div className="flex justify-between items-start mb-3">
                     <div>
-                      <h3 className="font-bold text-gray-900 text-base">{p.name}</h3>
-                      <p className="text-teal-600 font-bold text-lg mt-1">LKR {p.price}</p>
+                      <h3 className="font-bold text-gray-900 text-base">{p.title || "Untitled"}</h3>
+                      <p className="text-teal-600 font-bold text-lg mt-1">
+                        LKR {p.price?.toLocaleString() || "N/A"}
+                      </p>
                     </div>
                     <div className="flex gap-3 text-gray-500 text-sm">
-                      <span className="flex items-center gap-1"><BedIcon /> {p.beds}</span>
-                      <span className="flex items-center gap-1"><BathIcon /> {p.baths}</span>
+                      <span className="flex items-center gap-1">
+                        <BedIcon /> {p.bedrooms || 0}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <BathIcon /> {p.bathrooms || 0}
+                      </span>
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -555,6 +642,7 @@ export default function Home() {
               </div>
             ))}
           </div>
+
         </div>
 
         {/* Recent Activity */}
