@@ -1,6 +1,3 @@
-﻿# PropertyPulse - Smart Real Estate Finder Web Application
+﻿# PropertyPulse - Smart Real Estate Finder Web Application - Backend
 
-## Project Scope
-The Real Estate Platform is a web application designed to help users search, view, and compare property listings using advanced filtering and interactive map-based visualization. The platform enables registered users to save listings, explore agent profiles, and compare property details side by side. This project focuses on delivering core features within a short timeline, ensuring high-quality functionality, smooth UI, and strong backend logic.
-
-
+    A RESTful backend service that handles property data management, user authentication, and business logic. It provides secure APIs to support property search, filtering, and user interactions efficiently.
