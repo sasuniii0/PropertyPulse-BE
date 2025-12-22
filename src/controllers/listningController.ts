@@ -16,18 +16,24 @@ export const createListing = async (req: AuthRequest, res: Response) => {
 
     if (req.files && Array.isArray(req.files)) {
       for (const file of req.files as Express.Multer.File[]) {
-        const uploaded: any = await new Promise((resolve, reject) => {
+        const uploaded = await new Promise<any>((resolve, reject) => {
           const uploadStream = cloudinary.uploader.upload_stream(
             { folder: "listings" },
             (err, result) => {
-              if (err) reject(err);
-              else resolve(result);
+              if (err) {
+                console.error("Cloudinary error:", err);
+                reject(err);
+              } else {
+                resolve(result);
+              }
             }
           );
           uploadStream.end(file.buffer);
         });
 
-        uploadedImages.push(uploaded.secure_url);
+        if (uploaded?.secure_url) {
+          uploadedImages.push(uploaded.secure_url);
+        }
       }
     }
 
