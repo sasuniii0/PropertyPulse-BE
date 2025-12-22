@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import { PropertyType, ListingStatus, Listning } from "../models/listningModel";
+import { PropertyType, ListingStatus, ListingType ,Listning } from "../models/listningModel";
 import { AuthRequest } from "../middlewares/authMiddleware";
 import cloudinary from "../config/cloudinary";
 
 export const createListing = async (req: AuthRequest, res: Response) => {
   try {
-    const { title, description, price, size, propertyType , location} = req.body;
+    const { title, description, price, size, propertyType, listingType , location} = req.body;
 
     if (!req.user?.sub) {
       return res.status(401).json({ message: "Unauthorized: User not found" });
@@ -43,6 +43,7 @@ export const createListing = async (req: AuthRequest, res: Response) => {
       price,
       size,
       propertyType,
+      listingType,
       location, // <-- this must be an object
       images: uploadedImages,
       agent: agentId,
@@ -73,30 +74,36 @@ export const updateListing = async (req: AuthRequest, res: Response) => {
       return res.status(403).json({ message: "Unauthorized: Not your listing" });
     }
 
-    const { title, description, price,size, propertyType, location, images } = req.body;
+    const { title, description, price,size, propertyType, listningType, location, images } = req.body;
 
     if (propertyType && !Object.values(PropertyType).includes(propertyType)) {
       return res.status(400).json({ message: "Invalid Property Type" });
     }
 
-    let updatedData: any = { title, description, price,size , propertyType, location, images };
+    let updatedData: any = { title, description, price,size , propertyType,listningType, location, images };
 
     const uploadedImages: string[] = [];
 
     if (req.files && Array.isArray(req.files)) {
       for (const file of req.files as Express.Multer.File[]) {
-        const uploaded: any = await new Promise((resolve, reject) => {
+        const uploaded = await new Promise<any>((resolve, reject) => {
           const uploadStream = cloudinary.uploader.upload_stream(
             { folder: "listings" },
             (err, result) => {
-              if (err) reject(err);
-              else resolve(result);
+              if (err) {
+                console.error("Cloudinary error:", err);
+                reject(err);
+              } else {
+                resolve(result);
+              }
             }
           );
           uploadStream.end(file.buffer);
         });
 
-        uploadedImages.push(uploaded.secure_url);
+        if (uploaded?.secure_url) {
+          uploadedImages.push(uploaded.secure_url);
+        }
       }
     }
 

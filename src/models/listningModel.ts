@@ -14,6 +14,11 @@ export enum PropertyType {
   VILLA = "VILLA",
 }
 
+export enum ListingType {
+  SALE = "SALE",
+  RENT = "RENT",
+}
+
 export interface IListning extends Document {
     _id:mongoose.Types.ObjectId;
     title: string;
@@ -21,6 +26,7 @@ export interface IListning extends Document {
     price: string;
     size?: number;
     propertyType : PropertyType;
+    listingType: ListingType;   
     location: {
         address : string;
         lat: number;
@@ -41,6 +47,12 @@ const ListningSchema = new Schema (
             type: String,
             enum: Object.values(PropertyType),
             required: true,
+        },
+
+        listingType: { 
+            type: String, 
+            enum: Object.values(ListingType), 
+            required: true 
         },
 
         location: {
