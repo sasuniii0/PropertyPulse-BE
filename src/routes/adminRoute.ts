@@ -12,7 +12,8 @@ import {
     getSingleListing,
     updateListing,
     deleteListing,
-    getLocations
+    getLocations,
+    getRecentUsers
 } from "../controllers/adminController";
 import { authenticate } from "../middlewares/authMiddleware";
 
@@ -30,5 +31,6 @@ router.get('/single-listning/:id' , authenticate ,isAdmin, getSingleListing)
 router.put('/update-listning/"id' , authenticate, isAdmin , updateListing)
 router.delete('/delete-listning/:id' , authenticate , isAdmin , deleteListing)
 router.get('/get-locations' , authenticate,isAdmin,getLocations)
+router.get('/recent-users' , authenticate,isAdmin ,getRecentUsers)
 
 export default router;

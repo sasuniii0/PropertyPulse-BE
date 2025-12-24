@@ -185,3 +185,24 @@ export const getLocations = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+export const getRecentUsers = async (req: Request, res: Response) => {
+  try {
+    // Fetch latest 5 users (excluding sensitive fields)
+    const users = await User.find()
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .select("_id name email role isActive createdAt");
+
+    res.status(200).json({
+      success: true,
+      data: users,
+    });
+  } catch (error) {
+    console.error("Error fetching recent users:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch recent users",
+    });
+  }
+};
