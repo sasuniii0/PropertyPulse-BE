@@ -8,13 +8,16 @@ import {
     getAllListings,
     getListingById,
     searchListings,
-    approvedListning
+    approvedListning,
+    getLocations
+    
 } from "../controllers/listningController";
 import { agentOnly } from "../middlewares/isAgentMiddleware";
 import { isAdmin } from "../middlewares/isAdminMiddleware";
 import { authenticate } from "../middlewares/authMiddleware";
 import { approveListing,rejectListing } from "../controllers/adminController";  
 import { upload } from "../middlewares/multerMiddleware";
+import isClient from '../middlewares/isClientMiddleware'
 
 const router = express.Router();
 
@@ -33,7 +36,11 @@ router.get("/search", searchListings);
 
 router.get("/approved", authenticate ,approvedListning)
 
+router.get('/get-locations' , authenticate ,getLocations)
+
 router.get("/:id" ,getListingById)
+
+
 
 
 export default router;

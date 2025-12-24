@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { PropertyType, ListingStatus, ListingType ,Listning } from "../models/listningModel";
 import { AuthRequest } from "../middlewares/authMiddleware";
 import cloudinary from "../config/cloudinary";
+import { log } from "console";
 
 export const createListing = async (req: AuthRequest, res: Response) => {
   try {
@@ -267,3 +268,18 @@ export const approvedListning = async (req: AuthRequest, res: Response) => {
       console.log("Search error:", error);
   }
 }
+
+export const getLocations = async (req: Request, res: Response) => {
+  try {
+    const properties = await Listning.find(
+      { location: { $exists: true } },
+      { title: 1, location: 1, _id: 1 }
+    ).lean();
+
+    console.log("Fetched properties:", properties); // for debugging
+    return res.status(200).json(properties);
+  } catch (err: any) {
+    console.error("Failed to fetch property locations:", err.message);
+    return res.status(500).json({ message: err.message });
+  }
+};
