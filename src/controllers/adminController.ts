@@ -81,3 +81,89 @@ export const activateAgent = async (req: Request, res: Response) => {
 
   res.json({ message: "Agent account activated" });
 };
+
+
+export const getAllListings = async (req: Request, res: Response) => {
+  try {
+    const listings = await Listning.find()
+      .populate("agent", "name email")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      message: "All listings fetched successfully",
+      data: listings,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+export const getSingleListing = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const listing = await Listning.findById(id).populate(
+      "agent",
+      "name email"
+    );
+
+    if (!listing) {
+      return res.status(404).json({ message: "Listing not found" });
+    }
+
+    res.status(200).json({
+      message: "Listing fetched successfully",
+      data: listing,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const updateListing = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const updatedListing = await Listning.findByIdAndUpdate(
+      id,
+      {
+        $set: req.body, // allows partial updates
+      },
+      { new: true, runValidators: true }
+    ).populate("agent", "name email");
+
+    if (!updatedListing) {
+      return res.status(404).json({ message: "Listing not found" });
+    }
+
+    res.status(200).json({
+      message: "Listing updated successfully",
+      data: updatedListing,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const deleteListing = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const deletedListing = await Listning.findByIdAndDelete(id);
+
+    if (!deletedListing) {
+      return res.status(404).json({ message: "Listing not found" });
+    }
+
+    res.status(200).json({
+      message: "Listing deleted successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
