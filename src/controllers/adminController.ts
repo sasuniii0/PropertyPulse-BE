@@ -58,6 +58,11 @@ export const getAllAgents = async (req: Request , res: Response) => {
   res.json({ agents});
 }
 
+export const getAllUsers = async (req: Request , res: Response) => {
+  const clients = await User.find({ role : "CLIENT"});
+  res.json({ clients });
+}
+
 export const deactivateAgent = async (req: Request, res: Response) => {
   const agentId = req.params.id;
 
@@ -165,5 +170,18 @@ export const deleteListing = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getLocations = async (req: Request, res: Response) => {
+  try {
+    // Fetch properties with only required fields: _id, title, and location
+    const properties = await Listning.find({}, { title: 1, location: 1, _id: 1 });
+
+    // Return the locations
+    res.status(200).json(properties);
+  } catch (err) {
+    console.error("Failed to fetch property locations:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
