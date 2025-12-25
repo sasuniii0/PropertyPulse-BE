@@ -98,3 +98,27 @@ export const getUserById = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+export const checkAgentPaymentStatus = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id; // from auth middleware
+
+    const user = await User.findById(userId).select("role paymentStatus");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.role !== "AGENT") {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      paymentStatus: user.paymentStatus,
+    });
+  } catch (error) {
+    console.error("Payment status check error:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};

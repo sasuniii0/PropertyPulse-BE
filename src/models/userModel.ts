@@ -6,6 +6,12 @@ export enum Role {
   AGENT = "AGENT",
 }
 
+export enum PaymentStatus {
+  PENDING = "PENDING",
+  PAID = "PAID",
+  OVERDUE = "OVERDUE",
+}
+
 export interface IUser extends Document {
   name: string;
   email: string;
@@ -18,6 +24,7 @@ export interface IUser extends Document {
   isActive : Boolean;
   savedListings?: mongoose.Types.ObjectId[];
   listings?: mongoose.Types.ObjectId[];
+  paymentStatus?: PaymentStatus;
 }
 
 const UserSchema: Schema = new Schema(
@@ -40,6 +47,12 @@ const UserSchema: Schema = new Schema(
       { type: mongoose.Schema.Types.ObjectId, ref: "Listing" }
     ],
     phone: { type: String },
+
+    paymentStatus: {
+    type: String,
+    enum: Object.values(PaymentStatus),
+    default: PaymentStatus.PENDING,
+  },
 
     // Agent-specific fields
     bio: { type: String },
