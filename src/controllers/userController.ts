@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { User } from "../models/userModel";
 import { AuthRequest } from "../middlewares/authMiddleware";
+import { log } from "console";
 
 //   UPDATE / EDIT USER PROFILE
 export const updateProfile = async (req: AuthRequest, res: Response) => {
@@ -84,4 +85,16 @@ export const getMyDetails = async (req: AuthRequest, res: Response) => {
   }
 };
 
-
+// Get single user by ID
+export const getUserById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    console.log(id)
+    const user = await User.findById(id).lean();
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.status(200).json({ user });
+  } catch (err: any) {
+    console.error("Failed to fetch user by ID:", err.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};

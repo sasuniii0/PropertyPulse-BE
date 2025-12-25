@@ -283,3 +283,15 @@ export const getLocations = async (req: Request, res: Response) => {
     return res.status(500).json({ message: err.message });
   }
 };
+
+// Get all listings by agent
+export const getListingsByAgent = async (req: Request, res: Response) => {
+  try {
+    const { agentId } = req.params;
+    const listings = await Listning.find({ agent: agentId }).lean();
+    res.status(200).json({ listings });
+  } catch (err: any) {
+    console.error("Failed to fetch listings by agent:", err.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};

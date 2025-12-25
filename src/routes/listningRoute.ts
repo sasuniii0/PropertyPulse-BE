@@ -9,7 +9,8 @@ import {
     getListingById,
     searchListings,
     approvedListning,
-    getLocations
+    getLocations,
+    getListingsByAgent
     
 } from "../controllers/listningController";
 import { agentOnly } from "../middlewares/isAgentMiddleware";
@@ -40,6 +41,7 @@ router.get('/get-locations' , authenticate ,getLocations)
 
 router.get("/:id" ,getListingById)
 
+router.get("/agent/:agentId/listings",authenticate,isClient,getListingsByAgent)
 
 
 
