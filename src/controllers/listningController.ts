@@ -6,7 +6,7 @@ import { log } from "console";
 
 export const createListing = async (req: AuthRequest, res: Response) => {
   try {
-    const { title, description, price, size, propertyType, listingType , location} = req.body;
+    const { title, description, price, size, bathrooms, bedrooms ,propertyType, listingType , location} = req.body;
 
     if (!req.user?.sub) {
       return res.status(401).json({ message: "Unauthorized: User not found" });
@@ -43,6 +43,8 @@ export const createListing = async (req: AuthRequest, res: Response) => {
       description,
       price,
       size,
+      bathrooms,
+      bedrooms,
       propertyType,
       listingType,
       location, // <-- this must be an object
@@ -75,13 +77,13 @@ export const updateListing = async (req: AuthRequest, res: Response) => {
       return res.status(403).json({ message: "Unauthorized: Not your listing" });
     }
 
-    const { title, description, price,size, propertyType, listningType, location, images } = req.body;
+    const { title, description, price,size, propertyType,bathrooms,bedrooms, listningType, location, images } = req.body;
 
     if (propertyType && !Object.values(PropertyType).includes(propertyType)) {
       return res.status(400).json({ message: "Invalid Property Type" });
     }
 
-    let updatedData: any = { title, description, price,size , propertyType,listningType, location, images };
+    let updatedData: any = { title, description, price,size ,bathrooms,bedrooms, propertyType,listningType, location, images };
 
     const uploadedImages: string[] = [];
 

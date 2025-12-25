@@ -25,6 +25,8 @@ export interface IListning extends Document {
     description : string;
     price: string;
     size?: number;
+    bedrooms?: number;
+    bathrooms?: number;
     propertyType : PropertyType;
     listingType: ListingType;   
     location: {
@@ -43,6 +45,8 @@ const ListningSchema = new Schema (
         description : {type: String, required: true},
         price : {type: Number, required: true},
         size : {type: Number, required: false},
+        bedrooms: { type: Number, required: false, min: 0 },
+        bathrooms: { type: Number, required: false, min: 0 },
         propertyType:{
             type: String,
             enum: Object.values(PropertyType),
