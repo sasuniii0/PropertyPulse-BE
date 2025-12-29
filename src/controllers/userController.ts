@@ -6,7 +6,7 @@ import { log } from "console";
 //   UPDATE / EDIT USER PROFILE
 export const updateProfile = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.sub;
 
     const allowedFields = [
       "name",

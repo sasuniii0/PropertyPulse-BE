@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document} from "mongoose";
 
 export enum Role {
   CLIENT = "CLIENT",
@@ -64,5 +64,12 @@ const UserSchema: Schema = new Schema(
   },
   { timestamps: true }
 );
+
+UserSchema.pre<IUser>('save', function () {
+  if (this.isNew) {
+    this.paymentStatus =
+      this.role === Role.CLIENT ? PaymentStatus.PAID : PaymentStatus.PENDING;
+  }
+});
 
 export const User =  mongoose.model<IUser>("User", UserSchema);

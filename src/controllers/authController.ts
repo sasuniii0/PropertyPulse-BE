@@ -39,6 +39,8 @@ export const userRegister = async (req: Request, res: Response) => {
 
     await newUser.save();
 
+    const paymentStatus = newUser.role === Role.AGENT ? "PENDING" : "PAID";
+
     res.status(201).json({
       message:
         role === Role.AGENT
@@ -48,6 +50,7 @@ export const userRegister = async (req: Request, res: Response) => {
         id: newUser._id,
         email: newUser.email,
         Role: newUser.role,
+        paymentStatus, 
       },
     });
   } catch (err: any) {
