@@ -9,7 +9,7 @@ const router = express.Router();
 router.put("/updateMe", authenticate, updateProfile);
 router.delete("/deleteMe", authenticate, deleteAccount);
 router.get("/me", authenticate, getMyDetails);
-router.get("/:id" ,authenticate ,getUserById);
 router.get("/payment-status",authenticate,agentOnly,checkAgentPaymentStatus);
+router.get("/:id" ,authenticate ,getUserById);
 
 export default router;

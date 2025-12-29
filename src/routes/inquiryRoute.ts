@@ -4,7 +4,8 @@ import {
     getClientInquiries,
     getAgentInquiries,
     respondToInquiry,
-    closeInquiry
+    closeInquiry,
+    getRecentInquiries
 } from '../controllers/inquiryController'
 import { authenticate } from '../middlewares/authMiddleware'
 import { requireRole } from '../middlewares/roleRequiredMiddleware'
@@ -20,5 +21,7 @@ router.get("/my" , authenticate,requireRole([Role.CLIENT]) , getClientInquiries)
 router.get("/agent", authenticate, requireRole([Role.AGENT]), getAgentInquiries);
 router.patch("/:id/respond", authenticate, requireRole([Role.AGENT]), respondToInquiry);
 router.patch("/:id/close", authenticate, requireRole([Role.AGENT]), closeInquiry);
+
+router.get("/recent", authenticate, getRecentInquiries);
 
 export default router;

@@ -95,3 +95,30 @@ export const closeInquiry = async (req:Request , res:Response) => {
         res.status(500).json({message : "Failed to close inquiry"})
     }
 }
+
+// GET /api/inquiries/recent
+export const getRecentInquiries = async (req: AuthRequest, res: Response) => {
+  try {
+    const clientId = req.user?.sub;
+
+    if (!clientId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const inquiries = await Inquiry.find({ client: clientId })
+      .populate({
+        path: "listing",
+        select: "title location",
+      })
+      .sort({ createdAt: -1 })
+      .limit(5); // fetch last 5 inquiries
+
+    res.status(200).json({
+      message: "Recent inquiries fetched",
+      data: inquiries,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};

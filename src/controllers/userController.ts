@@ -101,9 +101,11 @@ export const getUserById = async (req: Request, res: Response) => {
 
 export const checkAgentPaymentStatus = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.id; // from auth middleware
+    if (!req.user?.sub) {
+      return res.status(401).json({ message: "Unauthorized: user ID missing" });
+    }
 
-    const user = await User.findById(userId).select("role paymentStatus");
+    const user = await User.findById(req.user.sub).select("role paymentStatus");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
