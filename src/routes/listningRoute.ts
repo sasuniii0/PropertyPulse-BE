@@ -10,7 +10,8 @@ import {
     searchListings,
     approvedListning,
     getLocations,
-    getListingsByAgent
+    getListingsByAgent,
+    getMyListings
     
 } from "../controllers/listningController";
 import { agentOnly } from "../middlewares/isAgentMiddleware";
@@ -30,6 +31,8 @@ router.put("/update/:id" , authenticate ,agentOnly,upload.array("images" , 20),u
 router.delete("/delete/:id" , authenticate , agentOnly ,deleteListing);
 
 router.get("/agent" , authenticate , agentOnly , getAgentListings);
+
+router.get("/my-listings" , authenticate,agentOnly,getMyListings)
 
 router.get("/" , authenticate, getAllListings);
 

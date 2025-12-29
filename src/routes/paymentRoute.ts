@@ -2,7 +2,7 @@ import express from 'express'
 import { Router } from "express";
 import { authenticate } from "../middlewares/authMiddleware";
 import { agentOnly } from "../middlewares/isAgentMiddleware";
-import { createAgentCheckoutSession ,confirmPayment} from "../controllers/paymentController";
+import { createAgentCheckoutSession ,confirmPayment , getPaymentDetails} from "../controllers/paymentController";
 
 const router = express.Router();
 
@@ -14,5 +14,5 @@ router.post(
 );
 
 router.post("/update", authenticate,agentOnly,confirmPayment);   // mark payment as PAID
-
+router.get('/details' , authenticate, agentOnly , getPaymentDetails)
 export default router

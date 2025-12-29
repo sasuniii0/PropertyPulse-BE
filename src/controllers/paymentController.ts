@@ -4,7 +4,7 @@ import { AuthRequest } from "../middlewares/authMiddleware";
 import PaymentModel from "../models/paymentModal";
 import { PaymentStatus } from "../models/userModel";
 import { User } from "../models/userModel";
-
+import { log } from "console";
 export const createAgentCheckoutSession = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.sub;
@@ -38,7 +38,7 @@ export const createAgentCheckoutSession = async (req: AuthRequest, res: Response
       amount: 5000, // match Stripe amount
       paymentStatus: PaymentStatus.PAID,
     });
-    
+
     await User.findByIdAndUpdate(payment.userId, { paymentStatus: PaymentStatus.PAID });
 
 
@@ -70,5 +70,30 @@ export const confirmPayment = async (req: AuthRequest, res: Response) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Payment confirmation failed" });
+  }
+};
+
+export const getPaymentDetails = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user!.sub;
+    const payment = await PaymentModel.findOne({ userId }).sort({ createdAt: -1 });
+    console.log(payment)
+
+    if (!payment) {
+      return res.status(404).json({
+        success: false,
+        message: "No payment record found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: payment,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch payment details",
+    });
   }
 };

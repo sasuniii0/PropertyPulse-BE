@@ -297,3 +297,33 @@ export const getListingsByAgent = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+export const getMyListings = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const listings = await Listning.find({
+      agent: userId,   // ✅ FIX HERE
+      isActive: true,  // optional but recommended
+    });
+
+    res.status(200).json({
+      success: true,
+      count: listings.length,
+      listings,
+    });
+  } catch (error) {
+    console.error("Get my listings error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch listings",
+    });
+  }
+};
