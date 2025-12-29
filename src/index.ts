@@ -3,7 +3,7 @@ import authRoute from "./routes/authRoute"
 import adminRoute from "./routes/adminRoute"
 import userRoute from "./routes/userRoute"
 import listningRoute from "./routes/listningRoute"
-import savedListningRoute from "./routes/savedListningRoutes"
+import savedListingRoute from "./routes/savedListningRoutes"
 import aiRoutes from "./routes/aiRoute"
 import inquiryRoute from './routes/inquiryRoute'
 import cors from "cors"
@@ -28,7 +28,7 @@ app.use("/api/v1/auth" , authRoute)
 app.use("/api/v1/admin" , adminRoute)
 app.use("/api/v1/user" ,userRoute)
 app.use("/api/v1/listning" , listningRoute)
-app.use("/api/v1/savedListnings" , savedListningRoute)
+app.use("/api/v1/saved-properties" , savedListingRoute)
 app.use("/api/v1/ai", aiRoutes);
 app.use("/api/v1/inquiries" , inquiryRoute)
 

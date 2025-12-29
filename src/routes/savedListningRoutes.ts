@@ -1,13 +1,27 @@
-import express from "express"
-import { authenticate } from "../middlewares/authMiddleware"
-import { requireRole } from "../middlewares/roleRequiredMiddleware";
-import { saveListing,removeSavedListing,getSavedListings } from "../controllers/savedListnings"
-import { Role } from "../models/userModel";
+import {
+  saveProperty,
+  unsaveProperty,
+  getSavedProperties,
+  checkIfSaved,
+  toggleSaveProperty
+} from '../controllers/savedListningController'
+
+import express from "express";
+import { authenticate } from '../middlewares/authMiddleware';
+import { requireRole } from '../middlewares/roleRequiredMiddleware';
+import { Role } from '../models/userModel';
+
 
 const router = express.Router();
 
-router.post("/save/:id" , authenticate, saveListing ,requireRole([Role.CLIENT]) )
-router.delete("/remove/:id" , authenticate , removeSavedListing ,requireRole([Role.CLIENT]))
-router.get("/" , authenticate , getSavedListings , requireRole([Role.CLIENT]))
+router.get('/',authenticate,requireRole([Role.CLIENT]) , getSavedProperties);
 
-export default router;
+router.post('/save',authenticate,requireRole([Role.CLIENT]), saveProperty);
+
+router.post('/toggle',authenticate,requireRole([Role.CLIENT]), toggleSaveProperty);
+
+router.get('/check/:listingId',authenticate,requireRole([Role.CLIENT]), checkIfSaved);
+
+router.delete('/:listingId',authenticate,requireRole([Role.CLIENT]), unsaveProperty);
+
+export default router
