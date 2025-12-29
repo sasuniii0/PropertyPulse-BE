@@ -6,6 +6,8 @@ import listningRoute from "./routes/listningRoute"
 import savedListingRoute from "./routes/savedListningRoutes"
 import aiRoutes from "./routes/aiRoute"
 import inquiryRoute from './routes/inquiryRoute'
+import paymentRoute from './routes/paymentRoute'
+import { stripeWebhook } from './controllers/stripeWebhook';
 import cors from "cors"
 import dotenv from "dotenv"
 import mongoose from "mongoose"
@@ -31,6 +33,12 @@ app.use("/api/v1/listning" , listningRoute)
 app.use("/api/v1/saved-properties" , savedListingRoute)
 app.use("/api/v1/ai", aiRoutes);
 app.use("/api/v1/inquiries" , inquiryRoute)
+app.use("/api/v1/payment",paymentRoute)
+app.post(
+  "/api/v1/webhook/stripe",
+  express.raw({ type: "application/json" }),
+  stripeWebhook
+);
 
 
 mongoose.connect(MONGO_URI).then(() =>{
