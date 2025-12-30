@@ -10,7 +10,6 @@ export const createInquiry = async (req: AuthRequest, res: Response) => {
   try {
     const { listingId, message } = req.body;
     const clientId = req.user!.sub; 
-    console.log(listingId,clientId)
 
     const listing = await Listning.findById(listingId);
     if (!listing) {

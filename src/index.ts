@@ -7,6 +7,7 @@ import savedListingRoute from "./routes/savedListningRoutes"
 import aiRoutes from "./routes/aiRoute"
 import inquiryRoute from './routes/inquiryRoute'
 import paymentRoute from './routes/paymentRoute'
+import emailRoute from './routes/emailRoute'
 import { stripeWebhook } from './controllers/stripeWebhook';
 import cors from "cors"
 import dotenv from "dotenv"
@@ -39,6 +40,7 @@ app.post(
   express.raw({ type: "application/json" }),
   stripeWebhook
 );
+app.use('/email', emailRoute);
 
 
 mongoose.connect(MONGO_URI).then(() =>{

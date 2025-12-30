@@ -187,7 +187,6 @@ export const getListingById = async (req: Request, res: Response) => {
 export const getAgentListings = async (req: AuthRequest, res: Response) => {
   try {
     const listings = await Listning.find({ agent: req.user?.sub });
-    console.log("Listings found:", listings);
 
     res.json({
       message: "Agent listings fetched",
@@ -278,7 +277,6 @@ export const getLocations = async (req: Request, res: Response) => {
       { title: 1, location: 1, _id: 1 }
     ).lean();
 
-    console.log("Fetched properties:", properties); // for debugging
     return res.status(200).json(properties);
   } catch (err: any) {
     console.error("Failed to fetch property locations:", err.message);
