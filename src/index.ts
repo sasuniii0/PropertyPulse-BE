@@ -9,6 +9,7 @@ import inquiryRoute from './routes/inquiryRoute'
 import paymentRoute from './routes/paymentRoute'
 import emailRoute from './routes/emailRoute'
 import inquiryEmailRoute from './routes/inquiryEmail'
+import comparisonRoute from './routes/comparisonRoute'
 import { stripeWebhook } from './controllers/stripeWebhook';
 import cors from "cors"
 import dotenv from "dotenv"
@@ -43,7 +44,7 @@ app.post(
 );
 app.use('/email', emailRoute);
 app.use('/email', inquiryEmailRoute);
-
+app.use('/api/properties', comparisonRoute);
 
 
 mongoose.connect(MONGO_URI).then(() =>{
