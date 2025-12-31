@@ -11,7 +11,8 @@ import {
     approvedListning,
     getLocations,
     getListingsByAgent,
-    getMyListings
+    getMyListings,
+    getRecentListing
     
 } from "../controllers/listningController";
 import { agentOnly } from "../middlewares/isAgentMiddleware";
@@ -20,6 +21,7 @@ import { authenticate } from "../middlewares/authMiddleware";
 import { approveListing,rejectListing } from "../controllers/adminController";  
 import { upload } from "../middlewares/multerMiddleware";
 import isClient from '../middlewares/isClientMiddleware'
+import clientOnly from "../middlewares/isClientMiddleware";
 
 const router = express.Router();
 
@@ -42,10 +44,10 @@ router.get("/approved", authenticate ,approvedListning)
 
 router.get('/get-locations' , authenticate ,getLocations)
 
+router.get('/recent' , authenticate, clientOnly , getRecentListing)
+
 router.get("/:id" ,getListingById)
 
 router.get("/agent/:agentId/listings",authenticate,isClient,getListingsByAgent)
-
-
 
 export default router;

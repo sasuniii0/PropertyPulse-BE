@@ -325,3 +325,21 @@ export const getMyListings = async (req: AuthRequest, res: Response) => {
     });
   }
 };
+
+export const getRecentListing = async(req:AuthRequest , res:Response) =>{
+  try {
+    // Fetch last 5 approved listings, sorted by creation date descending
+    const recentListings = await Listning.find({ status: ListingStatus.APPROVED, isActive: true })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .select("title price images location propertyType"); 
+
+    res.json({
+      success: true,
+      listings: recentListings,
+    });
+  } catch (err) {
+    console.error("Failed to fetch recent listings:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+}
