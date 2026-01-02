@@ -24,7 +24,7 @@ const MONGO_URI = process.env.MONGO_URI as string
 app.use(express.json());
 
 app.use(cors({
-    origin:["http://localhost:5173", "http://localhost:3000"],
+    origin:["http://localhost:5173", "http://localhost:3000","https://property-pulse-fe.vercel.app"],
     methods:["GET","POST","PUT","DELETE","PATCH","OPTIONS"],
     credentials:true,
 }))
