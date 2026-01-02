@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import {  Response, NextFunction } from "express";
 import { Role } from "../models/userModel";
 
 const clientOnly = (req: any, res: Response, next: NextFunction) => {

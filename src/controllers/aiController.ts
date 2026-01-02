@@ -1,4 +1,3 @@
-// controllers/aiController.ts
 import { Request, Response } from "express";
 import OpenAI from "openai";
 

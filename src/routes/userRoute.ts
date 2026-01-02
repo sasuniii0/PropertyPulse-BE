@@ -1,8 +1,7 @@
 import express from "express";
 import { updateProfile, deleteAccount , getMyDetails, getUserById ,checkAgentPaymentStatus} from "../controllers/userController";
 import { authenticate } from "../middlewares/authMiddleware";
-import isClient from '../middlewares/isClientMiddleware'
-import {agentOnly} from '../middlewares/isAgentMiddleware'
+import {agentOnly} from '../middlewares/isAgentMiddleware';
 
 const router = express.Router();
 

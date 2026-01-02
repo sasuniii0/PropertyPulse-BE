@@ -1,9 +1,8 @@
 import { Request, Response } from "express";
-import { PropertyType, ListingStatus, ListingType ,Listning } from "../models/listningModel";
+import { PropertyType, ListingStatus ,Listning } from "../models/listningModel";
 import { AuthRequest } from "../middlewares/authMiddleware";
 import cloudinary from "../config/cloudinary";
 import { Inquiry } from "../models/inquiry";
-import { log } from "console";
 
 export const createListing = async (req: AuthRequest, res: Response) => {
   try {

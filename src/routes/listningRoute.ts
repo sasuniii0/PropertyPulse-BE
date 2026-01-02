@@ -1,4 +1,3 @@
-// routes/listingRoutes.ts
 import express from "express";
 import { 
     createListing, 
@@ -18,11 +17,8 @@ import {
     
 } from "../controllers/listningController";
 import { agentOnly } from "../middlewares/isAgentMiddleware";
-import { isAdmin } from "../middlewares/isAdminMiddleware";
 import { authenticate } from "../middlewares/authMiddleware";
-import { approveListing,rejectListing } from "../controllers/adminController";  
 import { upload } from "../middlewares/multerMiddleware";
-import isClient from '../middlewares/isClientMiddleware'
 import clientOnly from "../middlewares/isClientMiddleware";
 
 const router = express.Router();

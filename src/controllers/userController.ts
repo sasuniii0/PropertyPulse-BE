@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { User } from "../models/userModel";
 import { AuthRequest } from "../middlewares/authMiddleware";
-import { log } from "console";
 
 //   UPDATE / EDIT USER PROFILE
 export const updateProfile = async (req: AuthRequest, res: Response) => {

@@ -1,5 +1,4 @@
 import express from 'express'
-import { Router } from "express";
 import { authenticate } from "../middlewares/authMiddleware";
 import { agentOnly } from "../middlewares/isAgentMiddleware";
 import { createAgentCheckoutSession ,confirmPayment , getPaymentDetails} from "../controllers/paymentController";

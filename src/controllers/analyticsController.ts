@@ -3,7 +3,6 @@ import { AuthRequest } from '../middlewares/authMiddleware';
 import { Listning } from '../models/listningModel';
 import { Inquiry } from '../models/inquiry';
 import savedListingModal from '../models/savedListingModal';
-import MarketAnalyticsModel from '../models/marketAnalyticsModel';
 
 // Generate AI-powered market insights
 const generateMarketInsight = (data: any): string => {

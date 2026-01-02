@@ -4,7 +4,7 @@ import { AuthRequest } from "../middlewares/authMiddleware";
 import PaymentModel from "../models/paymentModal";
 import { PaymentStatus } from "../models/userModel";
 import { User } from "../models/userModel";
-import { log } from "console";
+
 export const createAgentCheckoutSession = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.sub;
