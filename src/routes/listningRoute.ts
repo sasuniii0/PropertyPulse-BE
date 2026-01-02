@@ -12,7 +12,9 @@ import {
     getLocations,
     getListingsByAgent,
     getMyListings,
-    getRecentListing
+    getRecentListing,
+    getAgentListingsAPI,
+    getInquiriesByAgent
     
 } from "../controllers/listningController";
 import { agentOnly } from "../middlewares/isAgentMiddleware";
@@ -48,6 +50,11 @@ router.get('/recent' , authenticate, clientOnly , getRecentListing)
 
 router.get("/:id" ,getListingById)
 
-router.get("/agent/:agentId/listings",authenticate,isClient,getListingsByAgent)
+router.get("/agent/:agentId/listings",authenticate,getListingsByAgent)
+
+router.get("/agent/listings",authenticate, agentOnly, getAgentListingsAPI);
+
+router.get("/agent/inquiries",authenticate, agentOnly, getInquiriesByAgent);
+
 
 export default router;

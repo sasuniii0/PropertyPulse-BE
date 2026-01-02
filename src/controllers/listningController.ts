@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { PropertyType, ListingStatus, ListingType ,Listning } from "../models/listningModel";
 import { AuthRequest } from "../middlewares/authMiddleware";
 import cloudinary from "../config/cloudinary";
+import { Inquiry } from "../models/inquiry";
 import { log } from "console";
 
 export const createListing = async (req: AuthRequest, res: Response) => {
@@ -346,5 +347,43 @@ export const getRecentListing = async (req: AuthRequest, res: Response) => {
       success: false,
       message: "Server error",
     });
+  }
+};
+
+export const getAgentListingsAPI = async (req: AuthRequest, res: Response) => {
+  try {
+    const agentId = req.user.sub; // assuming you have auth middleware setting req.user
+
+    const listings = await Listning.find({ agent: agentId }).sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: listings,
+    });
+  } catch (err) {
+    console.error("Error fetching agent listings:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch agent listings" });
+  }
+};
+
+/**
+ * Get all inquiries assigned to the logged-in agent
+ */
+export const getInquiriesByAgent = async (req: AuthRequest, res: Response) => {
+  try {
+    const agentId = req.user.sub; // assuming you have auth middleware setting req.user
+
+    const inquiries = await Inquiry.find({ agent: agentId })
+      .populate("client", "name email")
+      .populate("listing", "title price propertyType") // populate listing info
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: inquiries,
+    });
+  } catch (err) {
+    console.error("Error fetching agent inquiries:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch agent inquiries" });
   }
 };

@@ -73,6 +73,10 @@ export const userLogin = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Invalid Credentials" });
     }
 
+    if (!existingUser.isActive || existingUser.isActive === false) {
+      return res.status(401).json({message: "Banned Account"})
+    }
+
     const accessToken = signAccessToken(existingUser);
     const refrreshToken = signRefreshToken(existingUser);
 
