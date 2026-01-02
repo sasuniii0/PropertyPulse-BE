@@ -1,7 +1,7 @@
 // src/routes/inquiryEmailRoute.ts
 import { Router, Request, Response } from 'express';
-import { sendMail } from './mailer';
-import {User} from '../models/userModel'; // Your Mongoose Agent model
+import { sendMail } from '../config/mailer';
+import {User} from '../models/userModel'; 
 
 interface InquiryEmailBody {
   agentId: string;
