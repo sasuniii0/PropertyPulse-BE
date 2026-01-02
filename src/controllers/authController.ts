@@ -81,6 +81,7 @@ export const userLogin = async (req: Request, res: Response) => {
       data: {
         email: existingUser.email,
         Role: existingUser.role,
+        name:existingUser.name,
         accessToken,
         refrreshToken,
       },

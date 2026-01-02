@@ -1,25 +1,9 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middlewares/authMiddleware';
 import { Listning } from '../models/listningModel';
+import { Inquiry } from '../models/inquiry';
+import savedListingModal from '../models/savedListingModal';
 import MarketAnalyticsModel from '../models/marketAnalyticsModel';
-
-// Helper function to calculate trend
-const calculateTrend = (currentAvg: number, previousAvg: number): 'RISING' | 'STABLE' | 'FALLING' => {
-  const changePercent = ((currentAvg - previousAvg) / previousAvg) * 100;
-  
-  if (changePercent > 3) return 'RISING';
-  if (changePercent < -3) return 'FALLING';
-  return 'STABLE';
-};
-
-// Helper function to determine demand level
-const calculateDemandLevel = (inquiries: number, listings: number): 'HIGH' | 'MEDIUM' | 'LOW' => {
-  const ratio = inquiries / listings;
-  
-  if (ratio > 4) return 'HIGH';
-  if (ratio > 2) return 'MEDIUM';
-  return 'LOW';
-};
 
 // Generate AI-powered market insights
 const generateMarketInsight = (data: any): string => {
@@ -53,150 +37,173 @@ const generateMarketInsight = (data: any): string => {
   return insights.join(', ') + '. ' + (data.additionalInsight || '');
 };
 
+/* ---------------- HELPERS ---------------- */
+
+const calculateTrend = (current: number, previous: number) => {
+  if (!previous) return "STABLE";
+  const diff = ((current - previous) / previous) * 100;
+  if (diff > 3) return "RISING";
+  if (diff < -3) return "FALLING";
+  return "STABLE";
+};
+
+const calculateDemandLevel = (inquiries: number, listings: number) => {
+  if (!listings) return "LOW";
+  const ratio = inquiries / listings;
+  if (ratio > 4) return "HIGH";
+  if (ratio > 2) return "MEDIUM";
+  return "LOW";
+};
+
+/* ---------------- CONTROLLER ---------------- */
+
 export const getMarketAnalytics = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.sub;
-    const { city, propertyType } = req.query;
+    const { city = "all", propertyType = "all" } = req.query;
 
-    // Build query filter
-    const filter: any = { isActive: true, status: 'APPROVED' };
-    if (city && city !== 'all') {
-      filter['location.address'] = { $regex: city, $options: 'i' };
+    /* ---------- LISTING FILTER ---------- */
+    const filter: any = {
+      isActive: true,
+      status: "APPROVED",
+    };
+
+    if (city !== "all") {
+      filter["location.address"] = { $regex: city, $options: "i" };
     }
-    if (propertyType && propertyType !== 'all') {
+
+    if (propertyType !== "all") {
       filter.propertyType = propertyType;
     }
 
-    // Get current month data
-    const currentDate = new Date();
-    const currentMonth = currentDate.toISOString().substring(0, 7); // YYYY-MM
-
-    // Get previous month for comparison
-    const previousDate = new Date(currentDate);
-    previousDate.setMonth(previousDate.getMonth() - 1);
-    const previousMonth = previousDate.toISOString().substring(0, 7);
-
-    // Fetch all active listings
+    /* ---------- LISTINGS ---------- */
     const listings = await Listning.find(filter);
     const totalListings = listings.length;
 
-    // Calculate average price
-    const avgPrice = listings.length > 0
-      ? listings.reduce((sum, listing) => sum + Number(listing.price), 0) / listings.length
-      : 0;
-
-    // Get property type distribution
-    const propertyTypes = listings.reduce((acc: any, listing) => {
-      const type = listing.propertyType;
-      if (!acc[type]) {
-        acc[type] = { type, count: 0 };
-      }
-      acc[type].count++;
-      return acc;
-    }, {});
-
-    const propertyTypeDistribution = Object.values(propertyTypes).map((item: any) => ({
-      type: item.type,
-      count: item.count,
-      percentage: Math.round((item.count / totalListings) * 100)
-    }));
-
-    // Simulate inquiry data (in production, this would come from an Inquiry model)
-    const totalInquiries = Math.round(totalListings * (2.5 + Math.random() * 2)); // 2.5-4.5x listings
-
-    // Get location-based demand (group by city)
-    const locationData = listings.reduce((acc: any, listing) => {
-      const city = listing.location.address.split(',')[0].trim();
-      if (!acc[city]) {
-        acc[city] = { city, listings: 0, inquiries: 0 };
-      }
-      acc[city].listings++;
-      acc[city].inquiries += Math.round(2 + Math.random() * 6); // 2-8 inquiries per listing
-      return acc;
-    }, {});
-
-    const demandHeatmap = Object.values(locationData)
-      .map((item: any) => ({
-        city: item.city,
-        demandLevel: calculateDemandLevel(item.inquiries, item.listings),
-        totalListings: item.listings,
-        totalInquiries: item.inquiries
-      }))
-      .sort((a: any, b: any) => b.totalInquiries - a.totalInquiries);
-
-    const hotLocation = demandHeatmap[0]?.city || 'N/A';
-
-    // Get price history (last 6 months)
-    // In production, this would come from historical data
-    const priceHistory = [];
-    for (let i = 5; i >= 0; i--) {
-      const date = new Date(currentDate);
-      date.setMonth(date.getMonth() - i);
-      const month = date.toLocaleDateString('en-US', { month: 'short' });
-      const historicalPrice = avgPrice * (0.85 + (i * 0.025) + Math.random() * 0.05);
-      const changePercent = i > 0 
-        ? ((historicalPrice - (avgPrice * (0.85 + ((i-1) * 0.025)))) / (avgPrice * (0.85 + ((i-1) * 0.025)))) * 100
+    const avgPrice =
+      totalListings > 0
+        ? listings.reduce((s, l) => s + Number(l.price), 0) / totalListings
         : 0;
-      
-      priceHistory.push({
-        month,
-        avgPrice: Math.round(historicalPrice),
-        changePercent: Number(changePercent.toFixed(1))
-      });
-    }
 
-    // Calculate price change percentage
-    const priceChangePercent = priceHistory.length >= 2
-      ? ((priceHistory[priceHistory.length - 1].avgPrice - priceHistory[priceHistory.length - 2].avgPrice) 
-         / priceHistory[priceHistory.length - 2].avgPrice) * 100
-      : 0;
+    /* ---------- PROPERTY TYPE DISTRIBUTION ---------- */
+    const propertyTypeDistribution = await Listning.aggregate([
+      { $match: filter },
+      {
+        $group: {
+          _id: "$propertyType",
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          type: "$_id",
+          count: 1,
+          percentage: {
+            $round: [
+              { $multiply: [{ $divide: ["$count", totalListings] }, 100] },
+              0,
+            ],
+          },
+        },
+      },
+    ]);
 
-    // Market trends by property type
-    const marketTrends = propertyTypeDistribution.map(type => {
-      const trend = Math.random() > 0.3 ? 'RISING' : Math.random() > 0.5 ? 'STABLE' : 'FALLING';
-      const changePercent = trend === 'RISING' 
-        ? 5 + Math.random() * 15 
-        : trend === 'FALLING' 
-        ? -(3 + Math.random() * 8) 
-        : -2 + Math.random() * 4;
-      
-      return {
-        propertyType: type.type,
-        trend,
-        changePercent: Number(changePercent.toFixed(1))
-      };
+    /* ---------- INQUIRIES (REAL DEMAND) ---------- */
+    const inquiries = await Inquiry.find({
+      listing: { $in: listings.map((l) => l._id) },
     });
 
-    // Generate AI insight
-    const inquiryGrowth = 15 + Math.random() * 20; // Simulated 15-35% growth
-    const marketInsight = generateMarketInsight({
-      propertyTypes: propertyTypeDistribution,
-      priceChangePercent: Number(priceChangePercent.toFixed(1)),
-      inquiryGrowth,
-      additionalInsight: 'The market is experiencing healthy activity across all segments.'
-    });
+    const totalInquiries = inquiries.length;
 
-    // Save analytics to database (for historical tracking)
-    const analyticsData = {
-      month: currentMonth,
-      city: city as string || 'all',
-      propertyType: propertyType as string || 'all',
-      avgPrice: Math.round(avgPrice),
-      totalListings,
-      totalInquiries,
-      demandLevel: calculateDemandLevel(totalInquiries, totalListings),
-      trend: calculateTrend(avgPrice, avgPrice * 0.95), // Compare with simulated previous price
-      marketInsight
-    };
+    /* ---------- DEMAND HEATMAP (CITY BASED) ---------- */
+    const demandHeatmap = await Inquiry.aggregate([
+      {
+        $lookup: {
+          from: "listnings",
+          localField: "listing",
+          foreignField: "_id",
+          as: "listing",
+        },
+      },
+      { $unwind: "$listing" },
+      { $match: filter },
+      {
+        $group: {
+          _id: "$listing.location.address",
+          totalInquiries: { $sum: 1 },
+          totalListings: { $addToSet: "$listing._id" },
+        },
+      },
+      {
+        $project: {
+          city: "$_id",
+          totalInquiries: 1,
+          totalListings: { $size: "$totalListings" },
+          demandLevel: {
+            $cond: [
+              { $gt: [{ $divide: ["$totalInquiries", { $size: "$totalListings" }] }, 4] },
+              "HIGH",
+              {
+                $cond: [
+                  { $gt: [{ $divide: ["$totalInquiries", { $size: "$totalListings" }] }, 2] },
+                  "MEDIUM",
+                  "LOW",
+                ],
+              },
+            ],
+          },
+        },
+      },
+      { $sort: { totalInquiries: -1 } },
+    ]);
 
-    // Try to update existing record or create new one
-    await MarketAnalyticsModel.findOneAndUpdate(
-      { month: currentMonth, city: analyticsData.city, propertyType: analyticsData.propertyType },
-      analyticsData,
-      { upsert: true, new: true }
-    );
+    const hotLocation = demandHeatmap[0]?.city || "N/A";
 
-    // Return analytics
+    /* ---------- USER INTEREST (SAVED PROPERTIES) ---------- */
+    const savedStats = await savedListingModal.aggregate([
+      {
+        $lookup: {
+          from: "listnings",
+          localField: "listing",
+          foreignField: "_id",
+          as: "listing",
+        },
+      },
+      { $unwind: "$listing" },
+      { $match: filter },
+      {
+        $group: {
+          _id: "$listing.propertyType",
+          saves: { $sum: 1 },
+        },
+      },
+    ]);
+
+    /* ---------- PRICE HISTORY (LAST 6 MONTHS) ---------- */
+    const priceHistory = await Listning.aggregate([
+      { $match: filter },
+      {
+        $group: {
+          _id: { $month: "$createdAt" },
+          avgPrice: { $avg: "$price" },
+        },
+      },
+      { $sort: { "_id": 1 } },
+      { $limit: 6 },
+    ]);
+
+    /* ---------- AI-STYLE INSIGHT (REAL DATA) ---------- */
+    const dominantType = propertyTypeDistribution.sort(
+      (a: any, b: any) => b.count - a.count
+    )[0];
+
+    const marketInsight = dominantType
+      ? `${dominantType.type} listings dominate the market with ${dominantType.percentage}% share. Demand is ${calculateDemandLevel(
+          totalInquiries,
+          totalListings
+        ).toLowerCase()} across major cities.`
+      : "Market data is stabilizing.";
+
+    /* ---------- RESPONSE ---------- */
     res.status(200).json({
       success: true,
       data: {
@@ -204,74 +211,178 @@ export const getMarketAnalytics = async (req: AuthRequest, res: Response) => {
         totalListings,
         totalInquiries,
         hotLocation,
-        marketInsight,
-        priceHistory,
         propertyTypeDistribution,
-        demandHeatmap: demandHeatmap.slice(0, 10), // Top 10 locations
-        marketTrends
-      }
+        demandHeatmap,
+        savedStats,
+        priceHistory,
+        marketInsight,
+      },
     });
-
-  } catch (error: any) {
-    console.error('Market analytics error:', error);
+  } catch (error) {
+    console.error("Analytics error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to generate market analytics',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      message: "Failed to generate analytics",
     });
   }
 };
 
-// Get historical analytics
 export const getHistoricalAnalytics = async (req: AuthRequest, res: Response) => {
   try {
-    const { months = 6 } = req.query;
-    
-    const analytics = await MarketAnalyticsModel
-      .find()
-      .sort({ month: -1 })
-      .limit(Number(months));
+    const months = Number(req.query.months) || 6;
+
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setMonth(endDate.getMonth() - months);
+
+    /* ---------- LISTINGS PER MONTH ---------- */
+    const listingStats = await Listning.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate },
+          status: "APPROVED",
+          isActive: true,
+        },
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+          },
+          avgPrice: { $avg: "$price" },
+          totalListings: { $sum: 1 },
+        },
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } },
+    ]);
+
+    /* ---------- INQUIRIES PER MONTH ---------- */
+    const inquiryStats = await Inquiry.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+          },
+          totalInquiries: { $sum: 1 },
+        },
+      },
+    ]);
+
+    /* ---------- MERGE DATA ---------- */
+    const history = listingStats.map((l, index) => {
+      const inquiry = inquiryStats.find(
+        (i) =>
+          i._id.year === l._id.year && i._id.month === l._id.month
+      );
+
+      const previous = index > 0 ? listingStats[index - 1] : null;
+
+      return {
+        month: `${l._id.year}-${String(l._id.month).padStart(2, "0")}`,
+        avgPrice: Math.round(l.avgPrice),
+        totalListings: l.totalListings,
+        totalInquiries: inquiry?.totalInquiries || 0,
+        demandLevel: calculateDemandLevel(
+          inquiry?.totalInquiries || 0,
+          l.totalListings
+        ),
+        trend: calculateTrend(
+          l.avgPrice,
+          previous?.avgPrice || l.avgPrice
+        ),
+      };
+    });
 
     res.status(200).json({
       success: true,
-      data: analytics
+      data: history.reverse(), // oldest → newest
     });
-
-  } catch (error: any) {
-    console.error('Historical analytics error:', error);
+  } catch (error) {
+    console.error("Historical analytics error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch historical analytics'
+      message: "Failed to fetch historical analytics",
     });
   }
 };
 
-// Generate monthly analytics report (can be run as a cron job)
 export const generateMonthlyReport = async (req: AuthRequest, res: Response) => {
   try {
-    // This would typically be called by a cron job
-    // For now, we'll just trigger the analytics generation
-    
-    const cities = ['Colombo', 'Kandy', 'Galle', 'Negombo'];
-    const propertyTypes = ['APARTMENT', 'HOUSE', 'VILLA', 'LAND'];
-    
-    for (const city of cities) {
-      for (const propertyType of propertyTypes) {
-        // Generate analytics for each combination
-        // This is a simplified version - in production, you'd call getMarketAnalytics internally
-      }
-    }
+    const start = new Date();
+    start.setDate(1);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date();
+
+    const report = await Listning.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: start, $lte: end },
+          status: "APPROVED",
+          isActive: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "inquiries",
+          localField: "_id",
+          foreignField: "listing",
+          as: "inquiries",
+        },
+      },
+      {
+        $group: {
+          _id: {
+            city: "$location.address",
+            propertyType: "$propertyType",
+          },
+          avgPrice: { $avg: "$price" },
+          totalListings: { $sum: 1 },
+          totalInquiries: { $sum: { $size: "$inquiries" } },
+        },
+      },
+      {
+        $project: {
+          city: "$_id.city",
+          propertyType: "$_id.propertyType",
+          avgPrice: { $round: ["$avgPrice", 0] },
+          totalListings: 1,
+          totalInquiries: 1,
+          demandLevel: {
+            $cond: [
+              { $gt: [{ $divide: ["$totalInquiries", "$totalListings"] }, 4] },
+              "HIGH",
+              {
+                $cond: [
+                  { $gt: [{ $divide: ["$totalInquiries", "$totalListings"] }, 2] },
+                  "MEDIUM",
+                  "LOW",
+                ],
+              },
+            ],
+          },
+        },
+      },
+      { $sort: { totalInquiries: -1 } },
+    ]);
 
     res.status(200).json({
       success: true,
-      message: 'Monthly report generated successfully'
+      month: start.toISOString().substring(0, 7),
+      report,
     });
-
-  } catch (error: any) {
-    console.error('Generate monthly report error:', error);
+  } catch (error) {
+    console.error("Generate monthly report error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to generate monthly report'
+      message: "Failed to generate monthly report",
     });
   }
 };
