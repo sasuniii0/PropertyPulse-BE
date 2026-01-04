@@ -15,12 +15,16 @@ import inquiryEmailRoute from './routes/inquiryEmail';
 import comparisonRoute from './routes/comparisonRoute';
 import analyticsRoutes from './routes/analyticsRoute';
 import { stripeWebhook } from './controllers/stripeWebhook';
+import { log } from "console";
 
 dotenv.config();
 
 const app: Application = express();
 const SERVER_PORT = process.env.SERVER_PORT || "5000";
 const MONGO_URI = process.env.MONGO_URI || "";
+
+log( process.env.SERVER_PORT);
+log( process.env.MONGO_URI);
 
 app.use(express.json());
 
