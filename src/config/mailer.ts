@@ -1,6 +1,9 @@
-import nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 import dotenv from 'dotenv';
-dotenv.config(); // Load environment variables
+
+dotenv.config();
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
 
 interface MailOptions {
   to: string;
@@ -8,35 +11,11 @@ interface MailOptions {
   html: string;
 }
 
-// Configure email transporter
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-
-console.log(process.env.EMAIL_USER)
-console.log(process.env.EMAIL_PASS)
-
-// Verify transporter (optional but useful)
-transporter.verify((error, success) => {
-  if (error) {
-    console.error('Error verifying transporter:', error);
-  } else {
-    console.log('Email transporter is ready!');
-  }
-});
-
-// Function to send email
 export const sendMail = async ({ to, subject, html }: MailOptions) => {
-  const mailOptions = {
-    from: 'sasuniwijerathne@gmail.com', // sender address
+  return sgMail.send({
     to,
+    from: process.env.SENDGRID_SENDER!, // must be verified in SendGrid
     subject,
     html,
-  };
-
-  return transporter.sendMail(mailOptions);
+  });
 };
