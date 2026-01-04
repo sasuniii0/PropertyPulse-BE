@@ -30,9 +30,9 @@ const allowedOrigins = [
 ];
 
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // allow curl or mobile apps
-    if (allowedOrigins.indexOf(origin) === -1) {
+  origin: function(origin, callback) {
+    if (!origin) return callback(null, true); // allow curl / mobile
+    if (!allowedOrigins.includes(origin)) {
       return callback(new Error("CORS not allowed for this origin"), false);
     }
     return callback(null, true);
@@ -42,14 +42,13 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-// Handle preflight OPTIONS request globally
-app.options("*", cors({
+// Preflight for all routes
+app.options("/*", cors({
   origin: allowedOrigins,
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
-
 
 app.use("/api/v1/auth" , authRoute)
 app.use("/api/v1/admin" , adminRoute)
