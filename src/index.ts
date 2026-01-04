@@ -70,7 +70,7 @@ app.post(
   express.raw({ type: "application/json" }), // stripe requires raw body
   stripeWebhook
 );
-app.use('/api/v1/email', emailRoute);
+app.use('/email', emailRoute);
 app.use('/email', inquiryEmailRoute);
 app.use('/api/properties', comparisonRoute);
 app.use('/api/v1/analytics', analyticsRoutes);
