@@ -23,11 +23,33 @@ const MONGO_URI = process.env.MONGO_URI as string
 
 app.use(express.json());
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://property-pulse-fe.vercel.app"
+];
+
 app.use(cors({
-    origin:["http://localhost:5173", "http://localhost:3000","https://property-pulse-fe.vercel.app", "https://propertypulse-be-production.up.railway.app"],
-    methods:["GET","POST","PUT","DELETE","PATCH","OPTIONS"],
-    credentials:true,
-}))
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // allow curl or mobile apps
+    if (allowedOrigins.indexOf(origin) === -1) {
+      return callback(new Error("CORS not allowed for this origin"), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
+// Handle preflight OPTIONS request globally
+app.options("*", cors({
+  origin: allowedOrigins,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
 
 app.use("/api/v1/auth" , authRoute)
 app.use("/api/v1/admin" , adminRoute)
