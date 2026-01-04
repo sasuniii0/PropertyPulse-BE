@@ -28,10 +28,9 @@ export const createAgentCheckoutSession = async (req: AuthRequest, res: Response
       metadata: {
         userId, // important
       },
-      success_url: `${process.env.CLIENT_URL}/payment-success`,
-      cancel_url: `${process.env.CLIENT_URL}/dashboard`,
+      success_url:"",
+      cancel_url: " ",
     });
-    console.log("Stripe Secret:", process.env.STRIPE_SECRET_KEY);
 
     const payment = await PaymentModel.create({
       userId,
