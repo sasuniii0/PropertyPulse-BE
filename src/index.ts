@@ -32,30 +32,26 @@ const allowedOrigins = [
 ];
 
 // Global CORS middleware
-app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin) return callback(null, true); // allow curl / mobile
-    if (!allowedOrigins.includes(origin)) {
-      return callback(new Error("CORS not allowed for this origin"), false);
-    }
-    return callback(null, true);
-  },
-  credentials: true,
-  methods: ["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
-  allowedHeaders: ["Content-Type","Authorization"]
-}));
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
 
-// Preflight OPTIONS requests
-app.options("*", cors({
-  origin: function(origin, callback) {
-    if (!origin) return callback(null, true);
-    if (!allowedOrigins.includes(origin)) return callback(new Error("CORS not allowed"), false);
-    return callback(null, true);
-  },
-  credentials: true,
-  methods: ["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
-  allowedHeaders: ["Content-Type","Authorization"]
-}));
+  // Only check includes if origin exists
+  if (origin && allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
+
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type,Authorization");
+
+  // Handle preflight requests
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
+
 
 // Routes
 app.use("/api/v1/auth", authRoute);
