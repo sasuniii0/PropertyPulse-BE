@@ -136,7 +136,7 @@ export const deleteListing = async (req: AuthRequest, res: Response) => {
     const listing = await Listning.findById(listingId);
     if (!listing) return res.status(404).json({ message: "Listing not found" });
 
-    if (listing.agent.toString() !== req.user?.id) {
+    if (listing.agent.toString() !== req.user?.sub) {
       return res.status(403).json({ message: "Unauthorized: Not your listing" });
     }
 
