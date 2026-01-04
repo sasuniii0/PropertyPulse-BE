@@ -28,8 +28,8 @@ export const createAgentCheckoutSession = async (req: AuthRequest, res: Response
       metadata: {
         userId, // important
       },
-      success_url:"",
-      cancel_url: " ",
+      success_url: `${process.env.CLIENT_URL}/payment-success`,
+      cancel_url: `${process.env.CLIENT_URL}/home`,
     });
 
     const payment = await PaymentModel.create({
