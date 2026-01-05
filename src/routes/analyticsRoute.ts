@@ -22,7 +22,7 @@ router.post('/generate-report', authenticate, isAdmin, generateMonthlyReport);
 
 router.get("/monthly-sales", authenticate, getMonthlySales);
 
-router.get("/analytics/dashboard-metrics", authenticate, getDashboardMetrics);
+router.get("/dashboard-metrics", authenticate, getDashboardMetrics);
 
 
 export default router;
