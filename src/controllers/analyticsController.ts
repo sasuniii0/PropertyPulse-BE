@@ -349,65 +349,102 @@ export const generateMonthlyReport = async (req: AuthRequest, res: Response) => 
         },
       },
       {
-        $project: {
-          city: "$_id.city",
-          propertyType: "$_id.propertyType",
-          avgPrice: { $round: ["$avgPrice", 0] },
-          totalListings: 1,
-          totalInquiries: 1,
-          demandLevel: {
-            $cond: [
-              { $gt: [{ $divide: ["$totalInquiries", "$totalListings"] }, 4] },
-              "HIGH",
-              {
-                $cond: [
-                  { $gt: [{ $divide: ["$totalInquiries", "$totalListings"] }, 2] },
-                  "MEDIUM",
-                  "LOW",
-                ],
-              },
-            ],
+          $project: {
+            city: {
+              $arrayElemAt: [{ $split: ["$_id.city", ","] }, 0]
+            },
+            propertyType: "$_id.propertyType",
+            avgPrice: { $round: ["$avgPrice", 0] },
+            totalListings: 1,
+            totalInquiries: 1,
+            demandLevel: {
+              $cond: [
+                { $gt: [{ $divide: ["$totalInquiries", "$totalListings"] }, 4] },
+                "HIGH",
+                {
+                  $cond: [
+                    { $gt: [{ $divide: ["$totalInquiries", "$totalListings"] }, 2] },
+                    "MEDIUM",
+                    "LOW",
+                  ],
+                },
+              ],
+            },
           },
         },
-      },
       { $sort: { totalInquiries: -1 } },
     ]);
 
-    // 🧾 Create PDF
+   // ---------- PDF SETUP ----------
     const doc = new PDFDocument({ margin: 40, size: "A4" });
-
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
       `attachment; filename=market-report-${start.toISOString().substring(0, 7)}.pdf`
     );
-
     doc.pipe(res);
 
-    // Title
+    // ---------- TITLE ----------
     doc
-      .fontSize(20)
-      .text("Monthly Market Analytics Report", { align: "center" })
-      .moveDown();
+      .fontSize(18)
+      .font("Helvetica-Bold")
+      .text("Monthly Market Analytics Report", { align: "center" });
 
     doc
-      .fontSize(12)
-      .text(`Month: ${start.toISOString().substring(0, 7)}`)
-      .moveDown(1.5);
+      .moveDown(0.5)
+      .fontSize(11)
+      .font("Helvetica")
+      .text(`Month: ${start.toISOString().substring(0, 7)}`, { align: "center" });
 
-    // Table Header
-    doc.fontSize(11).font("Helvetica-Bold");
-    doc.text("City | Property | Avg Price | Listings | Inquiries | Demand");
-    doc.moveDown(0.5);
-    doc.font("Helvetica");
+    doc.moveDown(1.5);
 
+    // ---------- TABLE CONFIG ----------
+    const tableTop = doc.y;
+    const colX = {
+      city: 40,
+      property: 190,
+      price: 270,
+      listings: 340,
+      inquiries: 400,
+      demand: 470,
+    };
+
+    const rowHeight = 18;
+
+    // ---------- TABLE HEADER ----------
+    doc.font("Helvetica-Bold").fontSize(10);
+    doc.text("City", colX.city, tableTop);
+    doc.text("Property", colX.property, tableTop);
+    doc.text("Avg Price", colX.price, tableTop);
+    doc.text("Listings", colX.listings, tableTop);
+    doc.text("Inquiries", colX.inquiries, tableTop);
+    doc.text("Demand", colX.demand, tableTop);
+
+    doc.moveTo(40, tableTop + 12).lineTo(550, tableTop + 12).stroke();
+
+    doc.font("Helvetica").fontSize(9);
+
+    let y = tableTop + rowHeight;
+
+    // ---------- TABLE ROWS ----------
     report.forEach((item) => {
-      doc.text(
-        `${item.city} | ${item.propertyType} | Rs.${item.avgPrice} | ${item.totalListings} | ${item.totalInquiries} | ${item.demandLevel}`
-      );
+      if (y > 750) {
+        doc.addPage();
+        y = 50;
+      }
+
+      doc.text(item.city, colX.city, y, { width: 140 });
+      doc.text(item.propertyType, colX.property, y);
+      doc.text(`Rs. ${item.avgPrice.toLocaleString()}`, colX.price, y);
+      doc.text(item.totalListings.toString(), colX.listings, y);
+      doc.text(item.totalInquiries.toString(), colX.inquiries, y);
+      doc.text(item.demandLevel, colX.demand, y);
+
+      y += rowHeight;
     });
 
     doc.end();
+
   } catch (error) {
     console.error("Generate PDF report error:", error);
     res.status(500).json({
