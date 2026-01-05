@@ -206,3 +206,76 @@ export const getRecentUsers = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const getTopPerformingAgents = async (req: Request, res: Response) => {
+  try {
+    const start = new Date();
+    start.setDate(1);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date();
+
+    const agents = await Listning.aggregate([
+      {
+        $match: {
+          listingType: "SALE",
+          status: "APPROVED",
+          isActive: true,
+          createdAt: { $gte: start, $lte: end },
+        },
+      },
+      {
+        $lookup: {
+          from: "inquiries",
+          localField: "_id",
+          foreignField: "listing",
+          as: "inquiries",
+        },
+      },
+      {
+        $match: {
+          "inquiries.status": { $in: ["RESPONDED", "CLOSED"] },
+        },
+      },
+      {
+        $group: {
+          _id: "$agent",
+          sales: { $sum: 1 },
+          totalValue: { $sum: "$price" },
+        },
+      },
+      {
+        $sort: { sales: -1, totalValue: -1 },
+      },
+      {
+        $limit: 5,
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "_id",
+          foreignField: "_id",
+          as: "agent",
+        },
+      },
+      { $unwind: "$agent" },
+      {
+        $project: {
+          _id: 0,
+          agentId: "$agent._id",
+          name: "$agent.name",
+          sales: 1,
+          value: "$totalValue",
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      success: true,
+      agents,
+    });
+  } catch (error) {
+    console.error("Top agents error:", error);
+    res.status(500).json({ success: false });
+  }
+};
