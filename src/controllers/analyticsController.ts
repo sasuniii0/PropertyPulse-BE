@@ -3,6 +3,7 @@ import { AuthRequest } from '../middlewares/authMiddleware';
 import { Listning } from '../models/listningModel';
 import { Inquiry } from '../models/inquiry';
 import savedListingModal from '../models/savedListingModal';
+import PDFDocument from 'pdfkit';
 
 // Generate AI-powered market insights
 const generateMarketInsight = (data: any): string => {
@@ -372,13 +373,43 @@ export const generateMonthlyReport = async (req: AuthRequest, res: Response) => 
       { $sort: { totalInquiries: -1 } },
     ]);
 
-    res.status(200).json({
-      success: true,
-      month: start.toISOString().substring(0, 7),
-      report,
+    // 🧾 Create PDF
+    const doc = new PDFDocument({ margin: 40, size: "A4" });
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=market-report-${start.toISOString().substring(0, 7)}.pdf`
+    );
+
+    doc.pipe(res);
+
+    // Title
+    doc
+      .fontSize(20)
+      .text("Monthly Market Analytics Report", { align: "center" })
+      .moveDown();
+
+    doc
+      .fontSize(12)
+      .text(`Month: ${start.toISOString().substring(0, 7)}`)
+      .moveDown(1.5);
+
+    // Table Header
+    doc.fontSize(11).font("Helvetica-Bold");
+    doc.text("City | Property | Avg Price | Listings | Inquiries | Demand");
+    doc.moveDown(0.5);
+    doc.font("Helvetica");
+
+    report.forEach((item) => {
+      doc.text(
+        `${item.city} | ${item.propertyType} | Rs.${item.avgPrice} | ${item.totalListings} | ${item.totalInquiries} | ${item.demandLevel}`
+      );
     });
+
+    doc.end();
   } catch (error) {
-    console.error("Generate monthly report error:", error);
+    console.error("Generate PDF report error:", error);
     res.status(500).json({
       success: false,
       message: "Failed to generate monthly report",
