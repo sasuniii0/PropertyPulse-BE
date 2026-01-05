@@ -121,3 +121,15 @@ export const getRecentInquiries = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+export const getAllInquiries = async (req: AuthRequest, res: Response) => {
+  try {
+    const inquiries = await Inquiry.find()
+      .populate("client", "name email phone")
+      .populate("agent", "name email phone")
+      .populate("listing", "title location");
+    res.json(inquiries);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch inquiries" });
+  }
+};
