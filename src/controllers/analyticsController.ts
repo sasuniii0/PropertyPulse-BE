@@ -4,6 +4,7 @@ import { Listning } from '../models/listningModel';
 import { Inquiry } from '../models/inquiry';
 import savedListingModal from '../models/savedListingModal';
 import PDFDocument from 'pdfkit';
+import { User } from '../models/userModel';
 
 // Generate AI-powered market insights
 const generateMarketInsight = (data: any): string => {
@@ -451,5 +452,119 @@ export const generateMonthlyReport = async (req: AuthRequest, res: Response) => 
       success: false,
       message: "Failed to generate monthly report",
     });
+  }
+};
+
+export const getMonthlySales = async (req: AuthRequest, res: Response) => {
+  try {
+    const start = new Date();
+    start.setDate(1);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date();
+
+    const sales = await Listning.aggregate([
+      {
+        $match: {
+          listingType: "SALE",
+          status: "APPROVED",
+          isActive: true,
+          createdAt: { $gte: start, $lte: end },
+        },
+      },
+      {
+        $lookup: {
+          from: "inquiries",
+          localField: "_id",
+          foreignField: "listing",
+          as: "inquiries",
+        },
+      },
+      {
+        $match: {
+          "inquiries.status": { $in: ["RESPONDED", "CLOSED"] },
+        },
+      },
+      {
+        $count: "totalSales",
+      },
+    ]);
+
+    res.status(200).json({
+      success: true,
+      totalSales: sales[0]?.totalSales || 0,
+    });
+  } catch (error) {
+    console.error("Monthly sales error:", error);
+    res.status(500).json({ success: false });
+  }
+};
+
+export const getDashboardMetrics = async (req: AuthRequest, res: Response) => {
+  try {
+    const start = new Date();
+    start.setDate(1);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date();
+
+    const [
+      totalUsers,
+      activeListings,
+      activeAgents,
+      pendingApprovals,
+      monthlySales,
+    ] = await Promise.all([
+      User.countDocuments({ isActive: true }),
+      Listning.countDocuments({
+        status: "APPROVED",
+        isActive: true,
+      }),
+      User.countDocuments({
+        role: "AGENT",
+        isActive: true,
+      }),
+      Listning.countDocuments({
+        status: "PENDING",
+      }),
+      Listning.aggregate([
+        {
+          $match: {
+            listingType: "SALE",
+            status: "APPROVED",
+            isActive: true,
+            createdAt: { $gte: start, $lte: end },
+          },
+        },
+        {
+          $lookup: {
+            from: "inquiries",
+            localField: "_id",
+            foreignField: "listing",
+            as: "inquiries",
+          },
+        },
+        {
+          $match: {
+            "inquiries.status": { $in: ["RESPONDED", "CLOSED"] },
+          },
+        },
+        { $count: "count" },
+      ]),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      metrics: {
+        totalUsers,
+        activeListings,
+        activeAgents,
+        pendingApprovals,
+        monthlySales: monthlySales[0]?.count || 0,
+      },
+    });
+  } catch (error) {
+    console.error("Dashboard metrics error:", error);
+    res.status(500).json({ success: false });
   }
 };
